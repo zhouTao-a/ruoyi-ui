@@ -6,20 +6,20 @@
 
     <div class="right-menu flex align-center">
       <template v-if="appStore.device !== 'mobile'">
-        <el-select
-          v-if="userId === 1 && tenantEnabled"
-          v-model="companyName"
-          class="min-w-244px"
-          clearable
-          filterable
-          reserve-keyword
-          :placeholder="proxy.$t('navbar.selectTenant')"
-          @change="dynamicTenantEvent"
-          @clear="dynamicClearEvent"
-        >
-          <el-option v-for="item in tenantList" :key="item.tenantId" :label="item.companyName" :value="item.tenantId"> </el-option>
-          <template #prefix><svg-icon icon-class="company" class="el-input__icon input-icon" /></template>
-        </el-select>
+<!--        <el-select-->
+<!--          v-if="userId === 1 && tenantEnabled"-->
+<!--          v-model="companyName"-->
+<!--          class="min-w-244px"-->
+<!--          clearable-->
+<!--          filterable-->
+<!--          reserve-keyword-->
+<!--          :placeholder="proxy.$t('navbar.selectTenant')"-->
+<!--          @change="dynamicTenantEvent"-->
+<!--          @clear="dynamicClearEvent"-->
+<!--        >-->
+<!--          <el-option v-for="item in tenantList" :key="item.tenantId" :label="item.companyName" :value="item.tenantId"> </el-option>-->
+<!--          <template #prefix><svg-icon icon-class="company" class="el-input__icon input-icon" /></template>-->
+<!--        </el-select>-->
 
         <search-menu ref="searchMenuRef" />
         <el-tooltip content="搜索" effect="dark" placement="bottom">
@@ -42,13 +42,13 @@
             </el-popover>
           </div>
         </el-tooltip>
-        <el-tooltip content="Github" effect="dark" placement="bottom">
-          <ruo-yi-git id="ruoyi-git" class="right-menu-item hover-effect" />
-        </el-tooltip>
+<!--        <el-tooltip content="Github" effect="dark" placement="bottom">-->
+<!--          <ruo-yi-git id="ruoyi-git" class="right-menu-item hover-effect" />-->
+<!--        </el-tooltip>-->
 
-        <el-tooltip :content="proxy.$t('navbar.document')" effect="dark" placement="bottom">
-          <ruo-yi-doc id="ruoyi-doc" class="right-menu-item hover-effect" />
-        </el-tooltip>
+<!--        <el-tooltip :content="proxy.$t('navbar.document')" effect="dark" placement="bottom">-->
+<!--          <ruo-yi-doc id="ruoyi-doc" class="right-menu-item hover-effect" />-->
+<!--        </el-tooltip>-->
 
         <el-tooltip :content="proxy.$t('navbar.full')" effect="dark" placement="bottom">
           <screenfull id="screenfull" class="right-menu-item hover-effect" />
