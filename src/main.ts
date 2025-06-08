@@ -24,6 +24,7 @@ import HighLight from '@highlightjs/vue-plugin';
 // svg图标
 import 'virtual:svg-icons-register';
 import ElementIcons from '@/plugins/svgicon';
+import '@/assets/iconfont/iconfont.css';
 
 // permission control
 import './permission';
