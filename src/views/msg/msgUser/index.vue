@@ -28,11 +28,11 @@
           <el-col :span="1.5">
             <el-button type="success" plain icon="Edit" :disabled="single" @click="handleUpdate()" v-hasPermi="['msg:msgUser:edit']">修改</el-button>
           </el-col>
-          <el-col :span="1.5">
-            <el-button type="danger" plain icon="Delete" :disabled="multiple" @click="handleDelete()" v-hasPermi="['msg:msgUser:remove']"
-              >删除</el-button
-            >
-          </el-col>
+<!--          <el-col :span="1.5">-->
+<!--            <el-button type="danger" plain icon="Delete" :disabled="multiple" @click="handleDelete()" v-hasPermi="['msg:msgUser:remove']"-->
+<!--              >删除</el-button-->
+<!--            >-->
+<!--          </el-col>-->
           <el-col :span="1.5">
             <el-button type="warning" plain icon="Download" @click="handleExport" v-hasPermi="['msg:msgUser:export']">导出</el-button>
           </el-col>
@@ -78,30 +78,22 @@
             <el-tooltip content="修改" placement="top">
               <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['msg:msgUser:edit']"></el-button>
             </el-tooltip>
-            <el-tooltip content="删除" placement="top">
-              <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['msg:msgUser:remove']"></el-button>
-            </el-tooltip>
+<!--            <el-tooltip content="删除" placement="top">-->
+<!--              <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['msg:msgUser:remove']"></el-button>-->
+<!--            </el-tooltip>-->
           </template>
         </el-table-column>
       </el-table>
 
       <pagination v-show="total > 0" :total="total" v-model:page="queryParams.pageNum" v-model:limit="queryParams.pageSize" @pagination="getList" />
     </el-card>
-    <!-- 添加或修改用户对话框 -->
-    <el-dialog :title="dialog.title" v-model="dialog.visible" width="720px" append-to-body :close-on-click-modal="false" class="custom-dialog">
-      <div class="card-container">
-        <el-form
-          ref="msgUserFormRef"
-          :model="form"
-          :rules="rules"
-          label-width="100px"
-          label-position="right"
-          class="custom-form"
-          :label-suffix="'：'"
-        >
+    <!-- 添加或修改用户对话框 --><!-- 添加对话框打开完成事件 -->
+    <el-dialog @opened="handleDialogOpened" :title="dialog.title" v-model="dialog.visible" width="720px" append-to-body :close-on-click-modal="false">
+      <div class="card-container bg-amber-50 border border-amber-100">
+        <el-form ref="msgUserFormRef" :model="form" :rules="rules" label-width="100px" label-position="right">
           <div class="form-row">
             <el-form-item label="用户名" prop="userName">
-              <el-input v-model="form.userName" placeholder="请输入用户名" class="input-with-icon">
+              <el-input ref="userNameInputRef" v-model="form.userName" placeholder="请输入用户名" class="input-with-icon">
                 <template #prefix>
                   <i class="iconfont icon-xingming"></i>
                 </template>
@@ -145,40 +137,22 @@
               </el-input>
             </el-form-item>
 
-            <el-form-item label="生日" prop="birthday" class="birthday-form-item">
-              <el-date-picker
-                v-model="form.birthday"
-                type="date"
-                value-format="YYYY-MM-DD"
-                placeholder="请选择生日"
-                clearable
-                class="birthday-picker"
-              />
-            </el-form-item>
-          </div>
-
-          <div class="form-row">
-            <el-form-item label="农历生日" prop="lunarBirthday">
-              <el-date-picker
-                clearable
-                v-model="form.lunarBirthday"
-                type="date"
-                value-format="YYYY-MM-DD"
-                placeholder="请选择农历生日"
-                class="date-picker-with-icon"
-              >
-                <template #prefix>
-                  <i class="iconfont icon-shengri"></i>
-                </template>
-              </el-date-picker>
-            </el-form-item>
-
             <el-form-item label="邮箱地址" prop="email">
               <el-input v-model="form.email" placeholder="请输入邮箱地址" class="input-with-icon">
                 <template #prefix>
                   <i class="iconfont icon-youxiang"></i>
                 </template>
               </el-input>
+            </el-form-item>
+          </div>
+
+          <div class="form-row">
+            <el-form-item label="农历生日" prop="lunarBirthday">
+              <el-date-picker clearable v-model="form.lunarBirthday" type="date" value-format="YYYY-MM-DD" placeholder="请选择农历生日" />
+            </el-form-item>
+
+            <el-form-item label="生日" prop="birthday">
+              <el-date-picker clearable v-model="form.birthday" type="date" value-format="YYYY-MM-DD" placeholder="请选择生日" />
             </el-form-item>
           </div>
 
@@ -223,6 +197,8 @@
 <script setup name="MsgUser" lang="ts">
 import { listMsgUser, getMsgUser, delMsgUser, addMsgUser, updateMsgUser } from '@/api/msg/msgUser';
 import { MsgUserVO, MsgUserQuery, MsgUserForm } from '@/api/msg/msgUser/types';
+import { ref, reactive, toRefs, getCurrentInstance, onMounted, nextTick } from 'vue'; // 确保导入nextTick
+import { ElInput } from 'element-plus';
 
 const { proxy } = getCurrentInstance() as ComponentInternalInstance;
 const { sys_user_sex, whether_flag } = toRefs<any>(proxy?.useDict('sys_user_sex', 'whether_flag'));
@@ -243,6 +219,22 @@ const dialog = reactive<DialogOption>({
   visible: false,
   title: ''
 });
+
+// 添加用户名输入框的引用
+const userNameInputRef = ref<InstanceType<typeof ElInput> | null>(null); // 声明 ref
+
+// 处理对话框完全打开事件
+const handleDialogOpened = () => {
+  nextTick(() => {
+    if (userNameInputRef.value) {
+      // 获取输入框的DOM元素并聚焦
+      const inputEl = userNameInputRef.value.input;
+      if (inputEl) {
+        inputEl.focus();
+      }
+    }
+  });
+};
 
 const initFormData: MsgUserForm = {
   id: undefined,
@@ -350,13 +342,13 @@ const submitForm = () => {
 };
 
 /** 删除按钮操作 */
-const handleDelete = async (row?: MsgUserVO) => {
-  const _ids = row?.id || ids.value;
-  await proxy?.$modal.confirm('是否确认删除用户编号为"' + _ids + '"的数据项？').finally(() => (loading.value = false));
-  await delMsgUser(_ids);
-  proxy?.$modal.msgSuccess('删除成功');
-  await getList();
-};
+// const handleDelete = async (row?: MsgUserVO) => {
+//   const _ids = row?.id || ids.value;
+//   await proxy?.$modal.confirm('是否确认删除用户编号为"' + _ids + '"的数据项？').finally(() => (loading.value = false));
+//   await delMsgUser(_ids);
+//   proxy?.$modal.msgSuccess('删除成功');
+//   await getList();
+// };
 
 /** 导出按钮操作 */
 const handleExport = () => {
@@ -375,50 +367,16 @@ onMounted(() => {
 </script>
 
 <style>
-.date-picker-with-icon .iconfont {
-  margin-right: 5px; /* 添加适当间距 */
-  pointer-events: none; /* 重要：允许点击穿透到日期选择器 */
-}
-
-.custom-dialog {
-  .el-dialog__body {
-    padding: 24px 32px;
-  }
+.form-row .el-input,
+.form-row .el-date-picker {
+  width: 100%; /* 强制所有输入组件宽度一致 */
 }
 
 .card-container {
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-  padding: 24px;
-}
-
-.custom-form {
-  --el-form-item-margin-bottom: 18px; /* 增加表单项间距 */
-  .el-form-item__label {
-    color: #333;
-    font-weight: 500;
-  }
-
-  .input-with-icon,
-  .select-with-icon,
-  .date-picker-with-icon {
-    .el-input__prefix {
-      width: 18px; /* 图标容器宽度 */
-      min-width: 18px; /* 防止容器被挤压 */
-      padding-left: 0px; /* 图标左侧内边距 */
-      padding-right: 1px; /* 图标右侧内边距 */
-    }
-
-    .el-icon {
-      font-size: 18px; /* 图标大小 */
-      margin-right: 0; /* 移除右侧默认间距 */
-    }
-
-    .el-input__inner {
-      padding-left: 2px; /* 输入框文本与左侧的距离 */
-    }
-  }
+  padding: 12px;
 }
 
 .form-row {
@@ -435,7 +393,7 @@ onMounted(() => {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  padding-top: 24px;
+  padding-top: 0px;
 
   .primary-btn {
     padding: 8px 24px;
@@ -451,24 +409,4 @@ onMounted(() => {
     padding: 8px 24px;
   }
 }
-
-.birthday-form-item {
-  position: relative;
-}
-
-.birthday-icon {
-  position: absolute;
-  left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 18px;
-  color: #999;
-  z-index: 1;
-  pointer-events: none;
-}
-
-.birthday-picker .el-input__inner {
-  padding-left: 30px !important; /* 给图标让位置 */
-}
-
 </style>
