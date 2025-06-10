@@ -73,6 +73,9 @@
     </el-form>
     <!--  底部  -->
     <div class="el-login-footer">
+      <img src="/src/assets/beian.png" alt="备案图标" style="width: 16px; height: 16px; margin-right: 4px" />
+      <a href="https://beian.mps.gov.cn/#/query/webSearch?code=43010302002151" rel="noreferrer" target="_blank">湘公网安备43010302002151号</a>
+      &nbsp;
       <span>涵涵通知</span>
     </div>
   </div>
