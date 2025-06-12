@@ -45,15 +45,14 @@ export interface MsgUserVO {
   email: string;
 
   /**
-   * 是否接收短信通知（T/F）
+   * 短信通知
    */
   smsNotifyFlag: string;
 
   /**
-   * 是否接收邮箱通知（T/F）
+   * 邮箱通知
    */
   emailNotifyFlag: string;
-
 }
 
 export interface MsgUserForm extends BaseEntity {
@@ -103,19 +102,17 @@ export interface MsgUserForm extends BaseEntity {
   email?: string;
 
   /**
-   * 是否接收短信通知（T/F）
+   * 短信通知
    */
   smsNotifyFlag?: string;
 
   /**
-   * 是否接收邮箱通知（T/F）
+   * 邮箱通知
    */
   emailNotifyFlag?: string;
-
 }
 
 export interface MsgUserQuery extends PageQuery {
-
   /**
    * 用户名
    */
@@ -126,11 +123,8 @@ export interface MsgUserQuery extends PageQuery {
    */
   phoneNumber?: string;
 
-    /**
-     * 日期范围参数
-     */
-    params?: any;
+  /**
+   * 日期范围参数
+   */
+  params?: any;
 }
-
-
-

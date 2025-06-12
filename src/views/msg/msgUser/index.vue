@@ -43,37 +43,37 @@
       <el-table v-loading="loading" :data="msgUserList" @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" align="center" />
         <el-table-column label="主键ID" align="center" prop="id" v-if="false" />
-        <el-table-column label="用户名" align="center" prop="userName" show-overflow-tooltip />
-        <el-table-column label="性别" align="center" prop="gender">
+        <el-table-column label="用户名" align="center" prop="userName" show-overflow-tooltip min-width="80" />
+        <el-table-column label="性别" align="center" prop="gender" min-width="50">
           <template #default="scope">
             <dict-tag :options="sys_user_sex" :value="scope.row.gender" />
           </template>
         </el-table-column>
-        <el-table-column label="用户编码" align="center" prop="userCode" show-overflow-tooltip />
-        <el-table-column label="身份证号" align="center" prop="idCard" show-overflow-tooltip width="170" />
-        <el-table-column label="手机号" align="center" prop="phoneNumber" show-overflow-tooltip />
-        <el-table-column label="生日" align="center" prop="birthday" width="100">
+        <el-table-column label="用户编码" align="center" prop="userCode" show-overflow-tooltip min-width="80" />
+        <el-table-column label="身份证号" align="center" prop="idCard" show-overflow-tooltip min-width="170" />
+        <el-table-column label="手机号" align="center" prop="phoneNumber" show-overflow-tooltip min-width="170" />
+        <el-table-column label="生日" align="center" prop="birthday" min-width="170">
           <template #default="scope">
-            <span>{{ parseTime(scope.row.birthday, '{y}-{m}-{d}') }}</span>
+            <span>{{ parseTime(scope.row.birthday, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="农历生日" align="center" prop="lunarBirthday" width="100">
+        <el-table-column label="农历生日" align="center" prop="lunarBirthday" min-width="170">
           <template #default="scope">
-            <span>{{ parseTime(scope.row.lunarBirthday, '{y}-{m}-{d}') }}</span>
+            <span>{{ parseTime(scope.row.lunarBirthday, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="邮箱地址" align="center" prop="email" show-overflow-tooltip width="160" />
-        <el-table-column label="短信通知" align="center" prop="smsNotifyFlag">
+        <el-table-column label="邮箱地址" align="center" prop="email" show-overflow-tooltip min-width="160" />
+        <el-table-column label="短信通知" align="center" prop="smsNotifyFlag" min-width="80">
           <template #default="scope">
             <dict-tag :options="whether_flag" :value="scope.row.smsNotifyFlag" />
           </template>
         </el-table-column>
-        <el-table-column label="邮箱通知" align="center" prop="emailNotifyFlag">
+        <el-table-column label="邮箱通知" align="center" prop="emailNotifyFlag" min-width="80">
           <template #default="scope">
             <dict-tag :options="whether_flag" :value="scope.row.emailNotifyFlag" />
           </template>
         </el-table-column>
-        <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+        <el-table-column label="操作" align="center" class-name="small-padding fixed-width" min-width="120">
           <template #default="scope">
             <el-tooltip content="修改" placement="top">
               <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['msg:msgUser:edit']"></el-button>
@@ -159,8 +159,8 @@
                 clearable
                 :disabled="isDetailView"
                 v-model="form.lunarBirthday"
-                type="date"
-                value-format="YYYY-MM-DD"
+                type="datetime"
+                value-format="YYYY-MM-DD HH:mm:ss"
                 placeholder="请选择农历生日"
               />
             </el-form-item>
@@ -170,8 +170,8 @@
                 clearable
                 :disabled="isDetailView"
                 v-model="form.birthday"
-                type="date"
-                value-format="YYYY-MM-DD"
+                type="datetime"
+                value-format="YYYY-MM-DD HH:mm:ss"
                 placeholder="请选择生日"
               />
             </el-form-item>
