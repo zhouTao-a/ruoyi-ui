@@ -173,6 +173,7 @@
                 type="datetime"
                 value-format="YYYY-MM-DD HH:mm:ss"
                 placeholder="请选择生日"
+                @change="onLunarChange"
               />
             </el-form-item>
           </div>
@@ -216,7 +217,7 @@
 </template>
 
 <script setup name="MsgUser" lang="ts">
-import { listMsgUser, getMsgUser, delMsgUser, addMsgUser, updateMsgUser } from '@/api/msg/msgUser';
+import { listMsgUser, getMsgUser, delMsgUser, addMsgUser, updateMsgUser, convertLunarToSolar } from '@/api/msg/msgUser';
 import { MsgUserVO, MsgUserQuery, MsgUserForm } from '@/api/msg/msgUser/types';
 import { ref, reactive, toRefs, getCurrentInstance, onMounted, nextTick } from 'vue'; // 确保导入nextTick
 import { ElInput } from 'element-plus';
@@ -257,6 +258,19 @@ const handleDialogOpened = () => {
       }
     }
   });
+};
+
+const onLunarChange = async (val: string) => {
+  if (!val) {
+    form.value.lunarBirthday = '';
+    return;
+  }
+  try {
+    const res = await convertLunarToSolar(val);
+    form.value.lunarBirthday = res.data;
+  } catch (err) {
+    console.error('农历转换失败', err);
+  }
 };
 
 const initFormData: MsgUserForm = {
