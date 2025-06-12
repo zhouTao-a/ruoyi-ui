@@ -28,11 +28,11 @@
           <el-col :span="1.5">
             <el-button type="success" plain icon="Edit" :disabled="single" @click="handleUpdate()" v-hasPermi="['msg:msgUser:edit']">修改</el-button>
           </el-col>
-<!--          <el-col :span="1.5">-->
-<!--            <el-button type="danger" plain icon="Delete" :disabled="multiple" @click="handleDelete()" v-hasPermi="['msg:msgUser:remove']"-->
-<!--              >删除</el-button-->
-<!--            >-->
-<!--          </el-col>-->
+          <el-col :span="1.5">
+            <el-button type="danger" plain icon="Delete" :disabled="multiple" @click="handleDelete()" v-hasPermi="['msg:msgUser:remove']"
+              >删除</el-button
+            >
+          </el-col>
           <el-col :span="1.5">
             <el-button type="warning" plain icon="Download" @click="handleExport" v-hasPermi="['msg:msgUser:export']">导出</el-button>
           </el-col>
@@ -78,9 +78,16 @@
             <el-tooltip content="修改" placement="top">
               <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['msg:msgUser:edit']"></el-button>
             </el-tooltip>
-<!--            <el-tooltip content="删除" placement="top">-->
-<!--              <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['msg:msgUser:remove']"></el-button>-->
-<!--            </el-tooltip>-->
+            <el-tooltip content="详情" placement="top">
+              <el-button link type="primary" @click="handleDetail(scope.row)" v-hasPermi="['msg:msgUser:detail']">
+                <template #default>
+                  <img src="@/assets/mes/Frame2.png" />
+                </template>
+              </el-button>
+            </el-tooltip>
+            <el-tooltip content="删除" placement="top">
+              <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['msg:msgUser:remove']"></el-button>
+            </el-tooltip>
           </template>
         </el-table-column>
       </el-table>
@@ -93,7 +100,7 @@
         <el-form ref="msgUserFormRef" :model="form" :rules="rules" label-width="100px" label-position="right">
           <div class="form-row">
             <el-form-item label="用户名" prop="userName">
-              <el-input ref="userNameInputRef" v-model="form.userName" placeholder="请输入用户名" class="input-with-icon">
+              <el-input ref="userNameInputRef" :disabled="isDetailView" v-model="form.userName" placeholder="请输入用户名" class="input-with-icon">
                 <template #prefix>
                   <i class="iconfont icon-xingming"></i>
                 </template>
@@ -101,7 +108,7 @@
             </el-form-item>
 
             <el-form-item label="性别" prop="gender">
-              <el-select v-model="form.gender" placeholder="请选择性别" class="select-with-icon">
+              <el-select :disabled="isDetailView" v-model="form.gender" placeholder="请选择性别" class="select-with-icon">
                 <template #prefix>
                   <i class="iconfont icon-xingbie"></i>
                 </template>
@@ -112,7 +119,7 @@
 
           <div class="form-row">
             <el-form-item label="用户编码" prop="userCode">
-              <el-input v-model="form.userCode" placeholder="请输入用户编码" class="input-with-icon">
+              <el-input :disabled="isDetailView" v-model="form.userCode" placeholder="请输入用户编码" class="input-with-icon">
                 <template #prefix>
                   <i class="iconfont icon-xingming"></i>
                 </template>
@@ -120,7 +127,7 @@
             </el-form-item>
 
             <el-form-item label="身份证号" prop="idCard">
-              <el-input v-model="form.idCard" placeholder="请输入身份证号">
+              <el-input :disabled="isDetailView" v-model="form.idCard" placeholder="请输入身份证号">
                 <template #prefix>
                   <i class="iconfont icon-idcard"></i>
                 </template>
@@ -130,7 +137,7 @@
 
           <div class="form-row">
             <el-form-item label="手机号" prop="phoneNumber">
-              <el-input v-model="form.phoneNumber" placeholder="请输入手机号" class="input-with-icon">
+              <el-input :disabled="isDetailView" v-model="form.phoneNumber" placeholder="请输入手机号" class="input-with-icon">
                 <template #prefix>
                   <i class="iconfont icon-shoujihaoma"></i>
                 </template>
@@ -138,7 +145,7 @@
             </el-form-item>
 
             <el-form-item label="邮箱地址" prop="email">
-              <el-input v-model="form.email" placeholder="请输入邮箱地址" class="input-with-icon">
+              <el-input :disabled="isDetailView" v-model="form.email" placeholder="请输入邮箱地址" class="input-with-icon">
                 <template #prefix>
                   <i class="iconfont icon-youxiang"></i>
                 </template>
@@ -148,17 +155,31 @@
 
           <div class="form-row">
             <el-form-item label="农历生日" prop="lunarBirthday">
-              <el-date-picker clearable v-model="form.lunarBirthday" type="date" value-format="YYYY-MM-DD" placeholder="请选择农历生日" />
+              <el-date-picker
+                clearable
+                :disabled="isDetailView"
+                v-model="form.lunarBirthday"
+                type="date"
+                value-format="YYYY-MM-DD"
+                placeholder="请选择农历生日"
+              />
             </el-form-item>
 
             <el-form-item label="生日" prop="birthday">
-              <el-date-picker clearable v-model="form.birthday" type="date" value-format="YYYY-MM-DD" placeholder="请选择生日" />
+              <el-date-picker
+                clearable
+                :disabled="isDetailView"
+                v-model="form.birthday"
+                type="date"
+                value-format="YYYY-MM-DD"
+                placeholder="请选择生日"
+              />
             </el-form-item>
           </div>
 
           <div class="form-row">
             <el-form-item label="短信通知" prop="smsNotifyFlag">
-              <el-select v-model="form.smsNotifyFlag" placeholder="请选择通知状态" class="select-with-icon">
+              <el-select :disabled="isDetailView" v-model="form.smsNotifyFlag" placeholder="请选择通知状态" class="select-with-icon">
                 <template #prefix>
                   <i class="iconfont icon-shifoutongzhi"></i>
                 </template>
@@ -167,7 +188,7 @@
             </el-form-item>
 
             <el-form-item label="邮箱通知" prop="emailNotifyFlag">
-              <el-select v-model="form.emailNotifyFlag" placeholder="请选择通知状态" class="select-with-icon">
+              <el-select :disabled="isDetailView" v-model="form.emailNotifyFlag" placeholder="请选择通知状态" class="select-with-icon">
                 <template #prefix>
                   <i class="iconfont icon-shifoutongzhi"></i>
                 </template>
@@ -180,7 +201,7 @@
 
       <template #footer>
         <div class="dialog-footer">
-          <el-button :loading="buttonLoading" type="primary" @click="submitForm" class="primary-btn">
+          <el-button v-if="!isDetailView" :loading="buttonLoading" type="primary" @click="submitForm" class="primary-btn">
             <template v-if="buttonLoading">
               <el-icon><Loading /></el-icon>
               <span class="ml-2">提交中</span>
@@ -214,6 +235,8 @@ const total = ref(0);
 
 const queryFormRef = ref<ElFormInstance>();
 const msgUserFormRef = ref<ElFormInstance>();
+
+const isDetailView = ref(false); // 是否为详情查看模式
 
 const dialog = reactive<DialogOption>({
   visible: false,
@@ -310,6 +333,7 @@ const handleSelectionChange = (selection: MsgUserVO[]) => {
 /** 新增按钮操作 */
 const handleAdd = () => {
   reset();
+  isDetailView.value = false; // 非只读模式
   dialog.visible = true;
   dialog.title = '添加用户';
 };
@@ -317,11 +341,23 @@ const handleAdd = () => {
 /** 修改按钮操作 */
 const handleUpdate = async (row?: MsgUserVO) => {
   reset();
+  isDetailView.value = false; // 设置修改模式
   const _id = row?.id || ids.value[0];
   const res = await getMsgUser(_id);
   Object.assign(form.value, res.data);
   dialog.visible = true;
   dialog.title = '修改用户';
+};
+
+/** 用户详情按钮操作 */
+const handleDetail = async (row?: MsgUserVO) => {
+  reset();
+  isDetailView.value = true; // 设置为只读模式
+  const _id = row?.id || ids.value[0];
+  const res = await getMsgUser(_id);
+  Object.assign(form.value, res.data);
+  dialog.visible = true;
+  dialog.title = '用户详情';
 };
 
 /** 提交按钮 */
@@ -342,13 +378,13 @@ const submitForm = () => {
 };
 
 /** 删除按钮操作 */
-// const handleDelete = async (row?: MsgUserVO) => {
-//   const _ids = row?.id || ids.value;
-//   await proxy?.$modal.confirm('是否确认删除用户编号为"' + _ids + '"的数据项？').finally(() => (loading.value = false));
-//   await delMsgUser(_ids);
-//   proxy?.$modal.msgSuccess('删除成功');
-//   await getList();
-// };
+const handleDelete = async (row?: MsgUserVO) => {
+  const _ids = row?.id || ids.value;
+  await proxy?.$modal.confirm('是否确认删除用户编号为"' + _ids + '"的数据项？').finally(() => (loading.value = false));
+  await delMsgUser(_ids);
+  proxy?.$modal.msgSuccess('删除成功');
+  await getList();
+};
 
 /** 导出按钮操作 */
 const handleExport = () => {

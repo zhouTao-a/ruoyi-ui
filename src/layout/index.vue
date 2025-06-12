@@ -72,9 +72,9 @@ onMounted(() => {
   initWebSocket(protocol + window.location.host + import.meta.env.VITE_APP_BASE_API + '/resource/websocket');
 });
 
-onMounted(() => {
-  initSSE(import.meta.env.VITE_APP_BASE_API + '/resource/sse');
-});
+// onMounted(() => {
+//   initSSE(import.meta.env.VITE_APP_BASE_API + '/resource/sse');
+// });
 
 const handleClickOutside = () => {
   useAppStore().closeSideBar({ withoutAnimation: false });
