@@ -19,6 +19,10 @@ export interface MsgGroupVO {
    */
   defaultTargetUserId: string | number;
 
+  /**
+   * 默认参考用户代码
+   */
+  defaultTargetUserCode: string;
 }
 
 export interface MsgGroupForm extends BaseEntity {
@@ -42,10 +46,13 @@ export interface MsgGroupForm extends BaseEntity {
    */
   defaultTargetUserId?: string | number;
 
+  /**
+   * 默认参考用户代码
+   */
+  defaultTargetUserCode: string;
 }
 
 export interface MsgGroupQuery extends PageQuery {
-
   /**
    * 分组名称
    */
@@ -56,11 +63,8 @@ export interface MsgGroupQuery extends PageQuery {
    */
   groupCode?: string;
 
-    /**
-     * 日期范围参数
-     */
-    params?: any;
+  /**
+   * 日期范围参数
+   */
+  params?: any;
 }
-
-
-

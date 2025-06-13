@@ -66,10 +66,22 @@ export const delMsgUser = (id: string | number | Array<string | number>) => {
  * 公历转农历
  * @param lunarDate 公历时间字符串 yyyy-MM-dd HH:mm:ss
  */
-export const convertLunarToSolar = (lunarDate: string): AxiosPromise<string> => {
+export const convertSolarToLunar = (lunarDate: string): AxiosPromise<string> => {
   return request({
     url: '/msg/date/getLunarDate',
     method: 'get',
     params: { date: lunarDate }
+  });
+};
+
+/**
+ * 农历转公历
+ * @param solarDate 公历时间字符串 yyyy-MM-dd HH:mm:ss
+ */
+export const convertLunarToSolar = (solarDate: string): AxiosPromise<string> => {
+  return request({
+    url: '/msg/date/getSolarDate',
+    method: 'get',
+    params: { date: solarDate }
   });
 };

@@ -29,7 +29,9 @@
             <el-button type="success" plain icon="Edit" :disabled="single" @click="handleUpdate()" v-hasPermi="['msg:msgGroup:edit']">修改</el-button>
           </el-col>
           <el-col :span="1.5">
-            <el-button type="danger" plain icon="Delete" :disabled="multiple" @click="handleDelete()" v-hasPermi="['msg:msgGroup:remove']">删除</el-button>
+            <el-button type="danger" plain icon="Delete" :disabled="multiple" @click="handleDelete()" v-hasPermi="['msg:msgGroup:remove']"
+              >删除</el-button
+            >
           </el-col>
           <el-col :span="1.5">
             <el-button type="warning" plain icon="Download" @click="handleExport" v-hasPermi="['msg:msgGroup:export']">导出</el-button>
@@ -40,10 +42,11 @@
 
       <el-table v-loading="loading" :data="msgGroupList" @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" align="center" />
-        <el-table-column label="主键ID" align="center" prop="id" v-if="true" />
+        <el-table-column label="主键ID" align="center" prop="id" v-if="false" />
         <el-table-column label="分组名称" align="center" prop="groupName" />
         <el-table-column label="分组编码" align="center" prop="groupCode" />
-        <el-table-column label="默认参考用户ID" align="center" prop="defaultTargetUserId" />
+        <el-table-column label="默认参考用户ID" align="center" prop="defaultTargetUserId" v-if="false" />
+        <el-table-column label="默认参考用户代码" align="center" prop="defaultTargetUserCode" />
         <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
           <template #default="scope">
             <el-tooltip content="修改" placement="top">
@@ -108,28 +111,21 @@ const initFormData: MsgGroupForm = {
   id: undefined,
   groupName: undefined,
   groupCode: undefined,
-  defaultTargetUserId: undefined,
-}
+  defaultTargetUserId: undefined
+};
 const data = reactive<PageData<MsgGroupForm, MsgGroupQuery>>({
-  form: {...initFormData},
+  form: { ...initFormData },
   queryParams: {
     pageNum: 1,
     pageSize: 10,
     groupName: undefined,
     groupCode: undefined,
-    params: {
-    }
+    params: {}
   },
   rules: {
-    id: [
-      { required: true, message: "主键ID不能为空", trigger: "blur" }
-    ],
-    groupName: [
-      { required: true, message: "分组名称不能为空", trigger: "blur" }
-    ],
-    groupCode: [
-      { required: true, message: "分组编码不能为空", trigger: "blur" }
-    ],
+    id: [{ required: true, message: '主键ID不能为空', trigger: 'blur' }],
+    groupName: [{ required: true, message: '分组名称不能为空', trigger: 'blur' }],
+    groupCode: [{ required: true, message: '分组编码不能为空', trigger: 'blur' }]
   }
 });
 
@@ -142,55 +138,55 @@ const getList = async () => {
   msgGroupList.value = res.rows;
   total.value = res.total;
   loading.value = false;
-}
+};
 
 /** 取消按钮 */
 const cancel = () => {
   reset();
   dialog.visible = false;
-}
+};
 
 /** 表单重置 */
 const reset = () => {
-  form.value = {...initFormData};
+  form.value = { ...initFormData };
   msgGroupFormRef.value?.resetFields();
-}
+};
 
 /** 搜索按钮操作 */
 const handleQuery = () => {
   queryParams.value.pageNum = 1;
   getList();
-}
+};
 
 /** 重置按钮操作 */
 const resetQuery = () => {
   queryFormRef.value?.resetFields();
   handleQuery();
-}
+};
 
 /** 多选框选中数据 */
 const handleSelectionChange = (selection: MsgGroupVO[]) => {
-  ids.value = selection.map(item => item.id);
+  ids.value = selection.map((item) => item.id);
   single.value = selection.length != 1;
   multiple.value = !selection.length;
-}
+};
 
 /** 新增按钮操作 */
 const handleAdd = () => {
   reset();
   dialog.visible = true;
-  dialog.title = "添加分组信息";
-}
+  dialog.title = '添加分组信息';
+};
 
 /** 修改按钮操作 */
 const handleUpdate = async (row?: MsgGroupVO) => {
   reset();
-  const _id = row?.id || ids.value[0]
+  const _id = row?.id || ids.value[0];
   const res = await getMsgGroup(_id);
   Object.assign(form.value, res.data);
   dialog.visible = true;
-  dialog.title = "修改分组信息";
-}
+  dialog.title = '修改分组信息';
+};
 
 /** 提交按钮 */
 const submitForm = () => {
@@ -198,32 +194,36 @@ const submitForm = () => {
     if (valid) {
       buttonLoading.value = true;
       if (form.value.id) {
-        await updateMsgGroup(form.value).finally(() =>  buttonLoading.value = false);
+        await updateMsgGroup(form.value).finally(() => (buttonLoading.value = false));
       } else {
-        await addMsgGroup(form.value).finally(() =>  buttonLoading.value = false);
+        await addMsgGroup(form.value).finally(() => (buttonLoading.value = false));
       }
-      proxy?.$modal.msgSuccess("操作成功");
+      proxy?.$modal.msgSuccess('操作成功');
       dialog.visible = false;
       await getList();
     }
   });
-}
+};
 
 /** 删除按钮操作 */
 const handleDelete = async (row?: MsgGroupVO) => {
   const _ids = row?.id || ids.value;
-  await proxy?.$modal.confirm('是否确认删除分组信息编号为"' + _ids + '"的数据项？').finally(() => loading.value = false);
+  await proxy?.$modal.confirm('是否确认删除分组信息编号为"' + _ids + '"的数据项？').finally(() => (loading.value = false));
   await delMsgGroup(_ids);
-  proxy?.$modal.msgSuccess("删除成功");
+  proxy?.$modal.msgSuccess('删除成功');
   await getList();
-}
+};
 
 /** 导出按钮操作 */
 const handleExport = () => {
-  proxy?.download('msg/msgGroup/export', {
-    ...queryParams.value
-  }, `msgGroup_${new Date().getTime()}.xlsx`)
-}
+  proxy?.download(
+    'msg/msgGroup/export',
+    {
+      ...queryParams.value
+    },
+    `msgGroup_${new Date().getTime()}.xlsx`
+  );
+};
 
 onMounted(() => {
   getList();
