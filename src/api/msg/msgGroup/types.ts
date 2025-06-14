@@ -50,6 +50,11 @@ export interface MsgGroupForm extends BaseEntity {
    * 默认参考用户代码
    */
   defaultTargetUserCode: string;
+
+  /**
+   * 默认参考用户名称
+   */
+  defaultTargetUserName: string;
 }
 
 export interface MsgGroupQuery extends PageQuery {
@@ -67,4 +72,24 @@ export interface MsgGroupQuery extends PageQuery {
    * 日期范围参数
    */
   params?: any;
+}
+
+/**
+ * 用户信息
+ */
+export interface UserVo {
+  /**
+   * 用户ID
+   */
+  id: string | number;
+
+  /**
+   * 用户名称
+   */
+  userName: string;
+
+  /**
+   * 用户代码
+   */
+  userCode: string;
 }

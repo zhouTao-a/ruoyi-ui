@@ -70,8 +70,21 @@
         <el-form-item label="分组编码" prop="groupCode">
           <el-input v-model="form.groupCode" placeholder="请输入分组编码" />
         </el-form-item>
-        <el-form-item label="默认参考用户ID" prop="defaultTargetUserId">
-          <el-input v-model="form.defaultTargetUserId" placeholder="请输入默认参考用户ID" />
+        <el-form-item label="参考用户" prop="defaultTargetUserId">
+          <el-select
+            v-model="form.defaultTargetUserId"
+            placeholder="请选择参考用户"
+            filterable
+            remote
+            clearable
+            :remote-method="fetchUserOptions"
+            :loading="loadingUser"
+            :default-first-option="true"
+            @change="handleUserChange"
+            @blur="handleUserBlur"
+          >
+            <el-option v-for="user in userOptions" :key="user.id" :label="`${user.userName}（${user.userCode}）`" :value="user.id" />
+          </el-select>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -85,8 +98,8 @@
 </template>
 
 <script setup name="MsgGroup" lang="ts">
-import { listMsgGroup, getMsgGroup, delMsgGroup, addMsgGroup, updateMsgGroup } from '@/api/msg/msgGroup';
-import { MsgGroupVO, MsgGroupQuery, MsgGroupForm } from '@/api/msg/msgGroup/types';
+import { listMsgGroup, getMsgGroup, delMsgGroup, addMsgGroup, updateMsgGroup, getUserList } from '@/api/msg/msgGroup';
+import { MsgGroupVO, MsgGroupQuery, MsgGroupForm, UserVo } from '@/api/msg/msgGroup/types';
 
 const { proxy } = getCurrentInstance() as ComponentInternalInstance;
 
@@ -107,11 +120,54 @@ const dialog = reactive<DialogOption>({
   title: ''
 });
 
+// 用于存储用户下拉选项列表，类型为 UserVo 数组
+const userOptions = ref<UserVo[]>([]);
+
+// 用于控制用户下拉加载状态（加载动画）
+const loadingUser = ref(false);
+
+// 异步函数：根据查询关键词从后台获取用户列表，下拉框用
+const fetchUserOptions = async (query: string) => {
+  loadingUser.value = true; // 开始加载，显示 loading 动画
+  try {
+    // 调用接口获取用户列表，如果没输入 query 就查全部用户
+    const res = await getUserList({ userName: query || '' });
+    // 将获取到的数据赋值给 userOptions，下拉列表使用
+    userOptions.value = res.data || [];
+  } finally {
+    loadingUser.value = false; // 不管成功还是失败，最后都关闭 loading
+  }
+};
+
+// 当用户从下拉列表中选择某个用户后触发的函数
+// 功能：根据选中的用户 id 找到对应的用户对象，然后设置 userCode 到表单中
+const handleUserChange = (selectedId: string | number) => {
+  // 在 userOptions 中找到匹配的用户对象
+  const selectedUser = userOptions.value.find((user) => user.id === selectedId);
+  // 将该用户的 userCode 设置到 form 表单的 defaultTargetUserCode 字段
+  form.value.defaultTargetUserCode = selectedUser?.userCode || '';
+  form.value.defaultTargetUserName = selectedUser?.userName || '';
+};
+
+// 当用户下拉框失去焦点时触发的校验函数
+// 功能：确保用户是从下拉中选的而不是手动输入了一个无效的值
+const handleUserBlur = () => {
+  // 查找当前 form 中 defaultTargetUserId 对应的用户是否存在于下拉选项中
+  const matched = userOptions.value.find((user) => user.id === form.value.defaultTargetUserId);
+  if (!matched) {
+    // 如果没找到，说明没从下拉里选，手动清空表单中相关字段
+    form.value.defaultTargetUserId = '';
+    form.value.defaultTargetUserCode = '';
+  }
+};
+
 const initFormData: MsgGroupForm = {
   id: undefined,
   groupName: undefined,
   groupCode: undefined,
-  defaultTargetUserId: undefined
+  defaultTargetUserId: undefined,
+  defaultTargetUserCode: '',
+  defaultTargetUserName: ''
 };
 const data = reactive<PageData<MsgGroupForm, MsgGroupQuery>>({
   form: { ...initFormData },
@@ -184,6 +240,13 @@ const handleUpdate = async (row?: MsgGroupVO) => {
   const _id = row?.id || ids.value[0];
   const res = await getMsgGroup(_id);
   Object.assign(form.value, res.data);
+
+  if (form.value.defaultTargetUserId) {
+    // 加载并包含该用户
+    const userRes = await getUserList({ id: form.value.defaultTargetUserId });
+    userOptions.value = userRes.data || [];
+  }
+
   dialog.visible = true;
   dialog.title = '修改分组信息';
 };
