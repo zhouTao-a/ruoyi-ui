@@ -6,6 +6,13 @@
   "description": "ruoyi-ui",
   "glyphs": [
     {
+      "icon_id": "17477330",
+      "name": "人员分组",
+      "font_class": "renyuanfenzu",
+      "unicode": "e7c7",
+      "unicode_decimal": 59335
+    },
+    {
       "icon_id": "8148627",
       "name": "生日",
       "font_class": "shengri",

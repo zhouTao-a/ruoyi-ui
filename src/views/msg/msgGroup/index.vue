@@ -43,14 +43,21 @@
       <el-table v-loading="loading" :data="msgGroupList" @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" align="center" />
         <el-table-column label="主键ID" align="center" prop="id" v-if="false" />
-        <el-table-column label="分组名称" align="center" prop="groupName" />
-        <el-table-column label="分组编码" align="center" prop="groupCode" />
+        <el-table-column label="分组名称" align="center" prop="groupName" min-width="100" />
+        <el-table-column label="分组编码" align="center" prop="groupCode" min-width="100" />
         <el-table-column label="默认参考用户ID" align="center" prop="defaultTargetUserId" v-if="false" />
-        <el-table-column label="默认参考用户代码" align="center" prop="defaultTargetUserCode" />
-        <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+        <el-table-column label="默认参考用户代码" align="center" prop="defaultTargetUserCode" min-width="100" />
+        <el-table-column label="操作" align="center" class-name="small-padding fixed-width" min-width="100">
           <template #default="scope">
             <el-tooltip content="修改" placement="top">
               <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['msg:msgGroup:edit']"></el-button>
+            </el-tooltip>
+            <el-tooltip content="详情" placement="top">
+              <el-button link type="primary" @click="handleDetail(scope.row)" v-hasPermi="['msg:msgUser:detail']">
+                <template #default>
+                  <img src="@/assets/mes/Frame2.png" />
+                </template>
+              </el-button>
             </el-tooltip>
             <el-tooltip content="删除" placement="top">
               <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['msg:msgGroup:remove']"></el-button>
@@ -62,16 +69,25 @@
       <pagination v-show="total > 0" :total="total" v-model:page="queryParams.pageNum" v-model:limit="queryParams.pageSize" @pagination="getList" />
     </el-card>
     <!-- 添加或修改分组信息对话框 -->
-    <el-dialog :title="dialog.title" v-model="dialog.visible" width="500px" append-to-body>
-      <el-form ref="msgGroupFormRef" :model="form" :rules="rules" label-width="80px">
+    <el-dialog @opened="handleDialogOpened" :title="dialog.title" v-model="dialog.visible" width="400px" append-to-body>
+      <el-form class="card-container" ref="msgGroupFormRef" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="分组名称" prop="groupName">
-          <el-input v-model="form.groupName" placeholder="请输入分组名称" />
+          <el-input :disabled="isDetailView" ref="groupNameInputRef" v-model="form.groupName" placeholder="请输入分组名称">
+            <template #prefix>
+              <i class="iconfont icon-renyuanfenzu"></i>
+            </template>
+          </el-input>
         </el-form-item>
         <el-form-item label="分组编码" prop="groupCode">
-          <el-input v-model="form.groupCode" placeholder="请输入分组编码" />
+          <el-input :disabled="isDetailView" v-model="form.groupCode" placeholder="请输入分组编码">
+            <template #prefix>
+              <i class="iconfont icon-renyuanfenzu"></i>
+            </template>
+          </el-input>
         </el-form-item>
-        <el-form-item label="参考用户" prop="defaultTargetUserId">
+        <el-form-item style="margin-bottom: 2px" label="参考用户" prop="defaultTargetUserId">
           <el-select
+            :disabled="isDetailView"
             v-model="form.defaultTargetUserId"
             placeholder="请选择参考用户"
             filterable
@@ -84,13 +100,16 @@
             @blur="handleUserBlur"
           >
             <el-option v-for="user in userOptions" :key="user.id" :label="`${user.userName}（${user.userCode}）`" :value="user.id" />
+            <template #prefix>
+              <i class="iconfont icon-xingming"></i>
+            </template>
           </el-select>
         </el-form-item>
       </el-form>
       <template #footer>
         <div class="dialog-footer">
-          <el-button :loading="buttonLoading" type="primary" @click="submitForm">确 定</el-button>
-          <el-button @click="cancel">取 消</el-button>
+          <el-button class="primary-btn" :loading="buttonLoading" type="primary" @click="submitForm" v-if="!isDetailView">确 定</el-button>
+          <el-button class="cancel-btn" @click="cancel">取 消</el-button>
         </div>
       </template>
     </el-dialog>
@@ -100,6 +119,8 @@
 <script setup name="MsgGroup" lang="ts">
 import { listMsgGroup, getMsgGroup, delMsgGroup, addMsgGroup, updateMsgGroup, getUserList } from '@/api/msg/msgGroup';
 import { MsgGroupVO, MsgGroupQuery, MsgGroupForm, UserVo } from '@/api/msg/msgGroup/types';
+import { ref, reactive, toRefs, getCurrentInstance, onMounted, nextTick } from 'vue';
+import { ElInput } from 'element-plus';
 
 const { proxy } = getCurrentInstance() as ComponentInternalInstance;
 
@@ -114,6 +135,20 @@ const total = ref(0);
 
 const queryFormRef = ref<ElFormInstance>();
 const msgGroupFormRef = ref<ElFormInstance>();
+
+const groupNameInputRef = ref<InstanceType<typeof ElInput> | null>(null); // 声明 ref
+// 处理对话框完全打开事件
+const handleDialogOpened = () => {
+  nextTick(() => {
+    if (groupNameInputRef.value) {
+      // 获取输入框的DOM元素并聚焦
+      const inputEl = groupNameInputRef.value.input;
+      if (inputEl) {
+        inputEl.focus();
+      }
+    }
+  });
+};
 
 const dialog = reactive<DialogOption>({
   visible: false,
@@ -230,6 +265,7 @@ const handleSelectionChange = (selection: MsgGroupVO[]) => {
 /** 新增按钮操作 */
 const handleAdd = () => {
   reset();
+  isDetailView.value = false;
   dialog.visible = true;
   dialog.title = '添加分组信息';
 };
@@ -237,6 +273,7 @@ const handleAdd = () => {
 /** 修改按钮操作 */
 const handleUpdate = async (row?: MsgGroupVO) => {
   reset();
+  isDetailView.value = false;
   const _id = row?.id || ids.value[0];
   const res = await getMsgGroup(_id);
   Object.assign(form.value, res.data);
@@ -249,6 +286,26 @@ const handleUpdate = async (row?: MsgGroupVO) => {
 
   dialog.visible = true;
   dialog.title = '修改分组信息';
+};
+
+const isDetailView = ref(false); // 是否为详情查看模式
+
+/** 查看详情按钮操作 */
+const handleDetail = async (row?: MsgGroupVO) => {
+  reset();
+  isDetailView.value = true;
+  const _id = row?.id || ids.value[0];
+  const res = await getMsgGroup(_id);
+  Object.assign(form.value, res.data);
+
+  if (form.value.defaultTargetUserId) {
+    // 加载并包含该用户
+    const userRes = await getUserList({ id: form.value.defaultTargetUserId });
+    userOptions.value = userRes.data || [];
+  }
+
+  dialog.visible = true;
+  dialog.title = '分组信息详情';
 };
 
 /** 提交按钮 */
@@ -292,3 +349,6 @@ onMounted(() => {
   getList();
 });
 </script>
+
+/* 使用common.scss中全部样式 */
+<style lang="scss" src="@/assets/styles/vue-column.scss" />

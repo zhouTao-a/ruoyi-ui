@@ -96,7 +96,7 @@
     </el-card>
     <!-- 添加或修改用户对话框 --><!-- 添加对话框打开完成事件 -->
     <el-dialog @opened="handleDialogOpened" :title="dialog.title" v-model="dialog.visible" width="720px" append-to-body :close-on-click-modal="false">
-      <div class="card-container bg-amber-50 border border-amber-100">
+      <div class="card-container">
         <el-form ref="msgUserFormRef" :model="form" :rules="rules" label-width="100px" label-position="right">
           <div class="form-row">
             <el-form-item label="用户名" prop="userName">
@@ -180,7 +180,7 @@
           </div>
 
           <div class="form-row">
-            <el-form-item label="短信通知" prop="smsNotifyFlag">
+            <el-form-item style="margin-bottom: 2px" label="短信通知" prop="smsNotifyFlag">
               <el-select :disabled="isDetailView" v-model="form.smsNotifyFlag" placeholder="请选择通知状态" class="select-with-icon">
                 <template #prefix>
                   <i class="iconfont icon-shifoutongzhi"></i>
@@ -189,7 +189,7 @@
               </el-select>
             </el-form-item>
 
-            <el-form-item label="邮箱通知" prop="emailNotifyFlag">
+            <el-form-item style="margin-bottom: 2px" label="邮箱通知" prop="emailNotifyFlag">
               <el-select :disabled="isDetailView" v-model="form.emailNotifyFlag" placeholder="请选择通知状态" class="select-with-icon">
                 <template #prefix>
                   <i class="iconfont icon-shifoutongzhi"></i>
@@ -203,13 +203,7 @@
 
       <template #footer>
         <div class="dialog-footer">
-          <el-button v-if="!isDetailView" :loading="buttonLoading" type="primary" @click="submitForm" class="primary-btn">
-            <template v-if="buttonLoading">
-              <el-icon><Loading /></el-icon>
-              <span class="ml-2">提交中</span>
-            </template>
-            <template v-else> 确 定 </template>
-          </el-button>
+          <el-button v-if="!isDetailView" :loading="buttonLoading" type="primary" @click="submitForm" class="primary-btn">确 定</el-button>
           <el-button @click="cancel" class="cancel-btn">取 消</el-button>
         </div>
       </template>
@@ -430,47 +424,5 @@ onMounted(() => {
 });
 </script>
 
-<style>
-.form-row .el-input,
-.form-row .el-date-picker {
-  width: 100%; /* 强制所有输入组件宽度一致 */
-}
-
-.card-container {
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-  padding: 12px;
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 24px; /* 列间距 */
-
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr; /* 移动端单栏布局 */
-  }
-}
-
-.dialog-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  padding-top: 0px;
-
-  .primary-btn {
-    padding: 8px 24px;
-    font-weight: 500;
-
-    &:hover {
-      background-color: #4c9eff;
-    }
-  }
-
-  .cancel-btn {
-    color: #606266;
-    padding: 8px 24px;
-  }
-}
-</style>
+/* 使用common.scss中全部样式 */
+<style lang="scss" src="@/assets/styles/vue-txo-column.scss" />

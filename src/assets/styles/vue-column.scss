@@ -1,0 +1,50 @@
+.form-row .el-input,
+.form-row .el-date-picker {
+  width: 100%; /* 强制所有输入组件宽度一致 */
+}
+
+.dialog-footer {
+  display: flex; /* 弹性布局 */
+  justify-content: flex-end; /* 内容靠右对齐（按钮靠右）*/
+  gap: 12px; /* 按钮之间间隔 12px */
+  padding: 0px; /* 顶部内边距为 0 */
+}
+
+.primary-btn {
+  padding: 8px 24px; /* 设置按钮的内边距，上下 8px，左右 24px，使按钮更宽大 */
+  font-weight: 500; /* 设置字体粗细为中等，增强视觉权重 */
+
+  /* 鼠标悬停时的样式 */
+  &:hover {
+    /* 鼠标悬停时改变背景色为亮蓝色，提升交互体验 */
+    background-color: #4c9eff;
+  }
+}
+
+.cancel-btn {
+  color: #606266;
+  padding: 8px 24px;
+}
+
+.card-container {
+  /* 设置背景颜色为白色 */
+  background: #fff;
+
+  /* 设置圆角边框，圆角半径为 12px */
+  border-radius: 12px;
+
+  /* 添加阴影效果，提升立体感 */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+
+  /* 设置内边距为 12px，使内容与边框之间有间距 */
+  padding: 12px; /* 正确：上 右 下 左 */
+}
+
+.el-dialog__footer {
+  margin-top: 0 !important;
+  padding-top: 2px !important; /* 可根据需要微调 */
+}
+
+
+
+
