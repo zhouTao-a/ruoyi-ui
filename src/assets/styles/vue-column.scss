@@ -1,13 +1,13 @@
-.form-row .el-input,
-.form-row .el-date-picker {
-  width: 100%; /* 强制所有输入组件宽度一致 */
+.form-input {
+  width: 100%; /* 或指定宽度如 300px */
+  box-sizing: border-box; /* 防止边框或 padding 导致溢出 */
 }
 
 .dialog-footer {
   display: flex; /* 弹性布局 */
   justify-content: flex-end; /* 内容靠右对齐（按钮靠右）*/
   gap: 12px; /* 按钮之间间隔 12px */
-  padding: 0px; /* 顶部内边距为 0 */
+  padding: 0; /* 顶部内边距为 0 */
 }
 
 .primary-btn {
@@ -41,8 +41,8 @@
 }
 
 .el-dialog__footer {
-  margin-top: 0 !important;
-  padding-top: 2px !important; /* 可根据需要微调 */
+  margin-top: 0;
+  padding-top: 2px; /* 可根据需要微调 */
 }
 
 

@@ -5,10 +5,10 @@
         <el-card shadow="hover">
           <el-form ref="queryFormRef" :model="queryParams" :inline="true">
             <el-form-item label="分组名称" prop="groupName">
-              <el-input v-model="queryParams.groupName" placeholder="请输入分组名称" clearable @keyup.enter="handleQuery" />
+              <el-input v-model="queryParams.groupName" placeholder="请输入分组名称" clearable @keyup.enter="handleQuery" style="width: 200px" />
             </el-form-item>
             <el-form-item label="分组编码" prop="groupCode">
-              <el-input v-model="queryParams.groupCode" placeholder="请输入分组编码" clearable @keyup.enter="handleQuery" />
+              <el-input v-model="queryParams.groupCode" placeholder="请输入分组编码" clearable @keyup.enter="handleQuery" style="width: 200px" />
             </el-form-item>
             <el-form-item>
               <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
@@ -46,7 +46,8 @@
         <el-table-column label="分组名称" align="center" prop="groupName" min-width="100" />
         <el-table-column label="分组编码" align="center" prop="groupCode" min-width="100" />
         <el-table-column label="默认参考用户ID" align="center" prop="defaultTargetUserId" v-if="false" />
-        <el-table-column label="默认参考用户代码" align="center" prop="defaultTargetUserCode" min-width="100" />
+        <el-table-column label="参考用户名称" align="center" prop="defaultTargetUserName" min-width="100" />
+        <el-table-column label="参考用户代码" align="center" prop="defaultTargetUserCode" min-width="100" />
         <el-table-column label="操作" align="center" class-name="small-padding fixed-width" min-width="100">
           <template #default="scope">
             <el-tooltip content="修改" placement="top">
@@ -72,14 +73,14 @@
     <el-dialog @opened="handleDialogOpened" :title="dialog.title" v-model="dialog.visible" width="400px" append-to-body>
       <el-form class="card-container" ref="msgGroupFormRef" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="分组名称" prop="groupName">
-          <el-input :disabled="isDetailView" ref="groupNameInputRef" v-model="form.groupName" placeholder="请输入分组名称">
+          <el-input class="form-input" :disabled="isDetailView" ref="groupNameInputRef" v-model="form.groupName" placeholder="请输入分组名称">
             <template #prefix>
               <i class="iconfont icon-renyuanfenzu"></i>
             </template>
           </el-input>
         </el-form-item>
         <el-form-item label="分组编码" prop="groupCode">
-          <el-input :disabled="isDetailView" v-model="form.groupCode" placeholder="请输入分组编码">
+          <el-input class="form-input" :disabled="isDetailView" v-model="form.groupCode" placeholder="请输入分组编码">
             <template #prefix>
               <i class="iconfont icon-renyuanfenzu"></i>
             </template>
@@ -87,6 +88,7 @@
         </el-form-item>
         <el-form-item style="margin-bottom: 2px" label="参考用户" prop="defaultTargetUserId">
           <el-select
+            class="form-input"
             :disabled="isDetailView"
             v-model="form.defaultTargetUserId"
             placeholder="请选择参考用户"
@@ -117,7 +119,7 @@
 </template>
 
 <script setup name="MsgGroup" lang="ts">
-import { listMsgGroup, getMsgGroup, delMsgGroup, addMsgGroup, updateMsgGroup, getUserList } from '@/api/msg/msgGroup';
+import { listMsgGroup, getMsgGroup, delMsgGroup, addMsgGroup, updateMsgGroup, userCodeList } from '@/api/msg/msgGroup';
 import { MsgGroupVO, MsgGroupQuery, MsgGroupForm, UserVo } from '@/api/msg/msgGroup/types';
 import { ref, reactive, toRefs, getCurrentInstance, onMounted, nextTick } from 'vue';
 import { ElInput } from 'element-plus';
@@ -166,7 +168,7 @@ const fetchUserOptions = async (query: string) => {
   loadingUser.value = true; // 开始加载，显示 loading 动画
   try {
     // 调用接口获取用户列表，如果没输入 query 就查全部用户
-    const res = await getUserList({ userName: query || '' });
+    const res = await userCodeList({ userName: query || '' });
     // 将获取到的数据赋值给 userOptions，下拉列表使用
     userOptions.value = res.data || [];
   } finally {
@@ -280,7 +282,7 @@ const handleUpdate = async (row?: MsgGroupVO) => {
 
   if (form.value.defaultTargetUserId) {
     // 加载并包含该用户
-    const userRes = await getUserList({ id: form.value.defaultTargetUserId });
+    const userRes = await userCodeList({ id: form.value.defaultTargetUserId });
     userOptions.value = userRes.data || [];
   }
 
@@ -300,7 +302,7 @@ const handleDetail = async (row?: MsgGroupVO) => {
 
   if (form.value.defaultTargetUserId) {
     // 加载并包含该用户
-    const userRes = await getUserList({ id: form.value.defaultTargetUserId });
+    const userRes = await userCodeList({ id: form.value.defaultTargetUserId });
     userOptions.value = userRes.data || [];
   }
 

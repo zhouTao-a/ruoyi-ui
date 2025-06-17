@@ -15,7 +15,7 @@ export interface MsgUserGroupVO {
   groupId: string | number;
 
   /**
-   * 代际差
+   * 辈分差
    */
   relativeGenerationDiff: number;
 
@@ -24,6 +24,25 @@ export interface MsgUserGroupVO {
    */
   kinshipLevel: string;
 
+  /**
+   * 分组名称
+   */
+  groupName?: string;
+
+  /**
+   * 分组编码
+   */
+  groupCode?: string;
+
+  /**
+   * 用户名
+   */
+  userName?: string;
+
+  /**
+   * 用户编码
+   */
+  userCode?: string;
 }
 
 export interface MsgUserGroupForm extends BaseEntity {
@@ -43,7 +62,7 @@ export interface MsgUserGroupForm extends BaseEntity {
   groupId?: string | number;
 
   /**
-   * 代际差
+   * 辈分差
    */
   relativeGenerationDiff?: number;
 
@@ -52,10 +71,28 @@ export interface MsgUserGroupForm extends BaseEntity {
    */
   kinshipLevel?: string;
 
+  /**
+   * 分组名称
+   */
+  groupName?: string;
+
+  /**
+   * 分组编码
+   */
+  groupCode?: string;
+
+  /**
+   * 用户名
+   */
+  userName?: string;
+
+  /**
+   * 用户编码
+   */
+  userCode?: string;
 }
 
 export interface MsgUserGroupQuery extends PageQuery {
-
   /**
    * 用户ID
    */
@@ -67,7 +104,7 @@ export interface MsgUserGroupQuery extends PageQuery {
   groupId?: string | number;
 
   /**
-   * 代际差
+   * 辈分差
    */
   relativeGenerationDiff?: number;
 
@@ -76,11 +113,48 @@ export interface MsgUserGroupQuery extends PageQuery {
    */
   kinshipLevel?: string;
 
-    /**
-     * 日期范围参数
-     */
-    params?: any;
+  /**
+   * 日期范围参数
+   */
+  params?: any;
 }
 
+/**
+ * 用户信息
+ */
+export interface UserVo {
+  /**
+   * 用户ID
+   */
+  id: string | number;
 
+  /**
+   * 用户名称
+   */
+  userName: string;
 
+  /**
+   * 用户代码
+   */
+  userCode: string;
+}
+
+/**
+ * 分组信息
+ */
+export interface GroupVo {
+  /**
+   * 分组ID
+   */
+  id: string | number;
+
+  /**
+   * 分组名称
+   */
+  groupName: string;
+
+  /**
+   * 分组代码
+   */
+  groupCode: string;
+}

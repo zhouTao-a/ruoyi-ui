@@ -65,7 +65,7 @@ export const delMsgGroup = (id: string | number | Array<string | number>) => {
 /**
  * 获取用户列表
  */
-export function getUserList(params?: { userName?: string; id?: string | number }) {
+export function userCodeList(params?: { userName?: string; id?: string | number }) {
   return request({
     url: '/msg/msgUser/userCodeList',
     method: 'get',

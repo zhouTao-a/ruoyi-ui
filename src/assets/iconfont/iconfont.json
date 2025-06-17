@@ -6,6 +6,20 @@
   "description": "ruoyi-ui",
   "glyphs": [
     {
+      "icon_id": "1278150",
+      "name": "辈分",
+      "font_class": "beifen",
+      "unicode": "e60c",
+      "unicode_decimal": 58892
+    },
+    {
+      "icon_id": "39671057",
+      "name": "亲属关系",
+      "font_class": "qinshuguanxi",
+      "unicode": "e600",
+      "unicode_decimal": 58880
+    },
+    {
       "icon_id": "17477330",
       "name": "人员分组",
       "font_class": "renyuanfenzu",

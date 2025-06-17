@@ -5,10 +5,10 @@
         <el-card shadow="hover">
           <el-form ref="queryFormRef" :model="queryParams" :inline="true">
             <el-form-item label="用户名" prop="userName">
-              <el-input v-model="queryParams.userName" placeholder="请输入用户名" clearable @keyup.enter="handleQuery" />
+              <el-input v-model="queryParams.userName" placeholder="请输入用户名" clearable @keyup.enter="handleQuery" style="width: 200px" />
             </el-form-item>
             <el-form-item label="手机号" prop="phoneNumber">
-              <el-input v-model="queryParams.phoneNumber" placeholder="请输入手机号" clearable @keyup.enter="handleQuery" />
+              <el-input v-model="queryParams.phoneNumber" placeholder="请输入手机号" clearable @keyup.enter="handleQuery" style="width: 200px" />
             </el-form-item>
             <el-form-item>
               <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
@@ -44,12 +44,12 @@
         <el-table-column type="selection" width="55" align="center" />
         <el-table-column label="主键ID" align="center" prop="id" v-if="false" />
         <el-table-column label="用户名" align="center" prop="userName" show-overflow-tooltip min-width="80" />
+        <el-table-column label="用户编码" align="center" prop="userCode" show-overflow-tooltip min-width="80" />
         <el-table-column label="性别" align="center" prop="gender" min-width="50">
           <template #default="scope">
             <dict-tag :options="sys_user_sex" :value="scope.row.gender" />
           </template>
         </el-table-column>
-        <el-table-column label="用户编码" align="center" prop="userCode" show-overflow-tooltip min-width="80" />
         <el-table-column label="身份证号" align="center" prop="idCard" show-overflow-tooltip min-width="170" />
         <el-table-column label="手机号" align="center" prop="phoneNumber" show-overflow-tooltip min-width="170" />
         <el-table-column label="生日" align="center" prop="birthday" min-width="170">
