@@ -14,23 +14,23 @@
                 <el-option v-for="group in groupOptions" :key="group.id" :label="`${group.groupName}（${group.groupCode}）`" :value="group.id" />
               </el-select>
             </el-form-item>
-            <el-form-item label="辈分差" prop="relativeGenerationDiff">
-              <el-input-number
-                v-model="queryParams.relativeGenerationDiff"
-                placeholder="请输入辈分差"
-                :min="-100"
-                :max="100"
-                :step="1"
-                controls-position="right"
-                style="width: 200px"
-                @keyup.enter="handleQuery"
-              />
-            </el-form-item>
-            <el-form-item label="亲缘关系" prop="kinshipLevel">
-              <el-select v-model="queryParams.kinshipLevel" placeholder="请选择亲缘关系" clearable style="width: 200px">
-                <el-option v-for="dict in kinship_level" :key="dict.value" :label="dict.label" :value="dict.value" />
-              </el-select>
-            </el-form-item>
+            <!--            <el-form-item label="辈分差" prop="relativeGenerationDiff">-->
+            <!--              <el-input-number-->
+            <!--                v-model="queryParams.relativeGenerationDiff"-->
+            <!--                placeholder="请输入辈分差"-->
+            <!--                :min="-100"-->
+            <!--                :max="100"-->
+            <!--                :step="1"-->
+            <!--                controls-position="right"-->
+            <!--                style="width: 200px"-->
+            <!--                @keyup.enter="handleQuery"-->
+            <!--              />-->
+            <!--            </el-form-item>-->
+            <!--            <el-form-item label="亲缘关系" prop="kinshipLevel">-->
+            <!--              <el-select v-model="queryParams.kinshipLevel" placeholder="请选择亲缘关系" clearable style="width: 200px">-->
+            <!--                <el-option v-for="dict in kinship_level" :key="dict.value" :label="dict.label" :value="dict.value" />-->
+            <!--              </el-select>-->
+            <!--            </el-form-item>-->
             <el-form-item>
               <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
               <el-button icon="Refresh" @click="resetQuery">重置</el-button>
@@ -72,8 +72,8 @@
         <el-table-column label="分组名称" align="center" prop="groupName" min-width="100" />
         <el-table-column label="分组代码" align="center" prop="groupCode" min-width="100" />
         <el-table-column label="分组ID" align="center" prop="groupId" v-if="false" />
-        <el-table-column label="辈分差" align="center" prop="relativeGenerationDiff" min-width="100" />
-        <el-table-column label="亲缘关系" align="center" prop="kinshipLevel" min-width="100">
+        <el-table-column label="辈分差" align="center" prop="relativeGenerationDiff" min-width="100" v-if="false" />
+        <el-table-column label="亲缘关系" align="center" prop="kinshipLevel" min-width="100" v-if="false">
           <template #default="scope">
             <dict-tag :options="kinship_level" :value="scope.row.kinshipLevel" />
           </template>
@@ -110,7 +110,7 @@
             <el-option v-for="user in userOptions" :key="user.id" :label="`${user.userName}（${user.userCode}）`" :value="user.id" />
           </el-select>
         </el-form-item>
-        <el-form-item label="分组" prop="groupId">
+        <el-form-item style="margin-bottom: 2px" label="分组" prop="groupId">
           <el-select class="form-input" v-model="form.groupId" placeholder="请选择分组" clearable :disabled="isDetailView">
             <template #prefix>
               <i class="iconfont icon-renyuanfenzu"></i>
@@ -118,30 +118,30 @@
             <el-option v-for="group in groupOptions" :key="group.id" :label="`${group.groupName}（${group.groupCode}）`" :value="group.id" />
           </el-select>
         </el-form-item>
-        <el-form-item label="辈分差" prop="relativeGenerationDiff">
-          <el-input-number
-            class="form-input"
-            v-model="form.relativeGenerationDiff"
-            placeholder="请输入辈分差"
-            :min="-100"
-            :max="100"
-            :step="1"
-            controls-position="right"
-            :disabled="isDetailView"
-          >
-            <template #prefix>
-              <i class="iconfont icon-beifen"></i>
-            </template>
-          </el-input-number>
-        </el-form-item>
-        <el-form-item style="margin-bottom: 2px" label="亲缘关系" prop="kinshipLevel">
-          <el-select class="form-input" v-model="form.kinshipLevel" placeholder="请选择亲缘关系" :disabled="isDetailView">
-            <template #prefix>
-              <i class="iconfont icon-qinshuguanxi"></i>
-            </template>
-            <el-option v-for="dict in kinship_level" :key="dict.value" :label="dict.label" :value="dict.value"></el-option>
-          </el-select>
-        </el-form-item>
+        <!--        <el-form-item label="辈分差" prop="relativeGenerationDiff">-->
+        <!--          <el-input-number-->
+        <!--            class="form-input"-->
+        <!--            v-model="form.relativeGenerationDiff"-->
+        <!--            placeholder="请输入辈分差"-->
+        <!--            :min="-100"-->
+        <!--            :max="100"-->
+        <!--            :step="1"-->
+        <!--            controls-position="right"-->
+        <!--            :disabled="isDetailView"-->
+        <!--          >-->
+        <!--            <template #prefix>-->
+        <!--              <i class="iconfont icon-beifen"></i>-->
+        <!--            </template>-->
+        <!--          </el-input-number>-->
+        <!--        </el-form-item>-->
+        <!--        <el-form-item style="margin-bottom: 2px" label="亲缘关系" prop="kinshipLevel">-->
+        <!--          <el-select class="form-input" v-model="form.kinshipLevel" placeholder="请选择亲缘关系" :disabled="isDetailView">-->
+        <!--            <template #prefix>-->
+        <!--              <i class="iconfont icon-qinshuguanxi"></i>-->
+        <!--            </template>-->
+        <!--            <el-option v-for="dict in kinship_level" :key="dict.value" :label="dict.label" :value="dict.value"></el-option>-->
+        <!--          </el-select>-->
+        <!--        </el-form-item>-->
       </el-form>
       <template #footer>
         <div class="dialog-footer">
@@ -224,9 +224,10 @@ const data = reactive<PageData<MsgUserGroupForm, MsgUserGroupQuery>>({
   rules: {
     id: [{ required: true, message: '主键ID不能为空', trigger: 'blur' }],
     userId: [{ required: true, message: '用户ID不能为空', trigger: 'blur' }],
-    groupId: [{ required: true, message: '分组ID不能为空', trigger: 'blur' }],
-    relativeGenerationDiff: [{ required: true, message: '辈分差不能为空', trigger: 'blur' }],
-    kinshipLevel: [{ required: true, message: '亲缘关系不能为空', trigger: 'change' }]
+    groupId: [{ required: true, message: '分组ID不能为空', trigger: 'blur' }]
+    // ,
+    // relativeGenerationDiff: [{ required: true, message: '辈分差不能为空', trigger: 'blur' }],
+    // kinshipLevel: [{ required: true, message: '亲缘关系不能为空', trigger: 'change' }]
   }
 });
 

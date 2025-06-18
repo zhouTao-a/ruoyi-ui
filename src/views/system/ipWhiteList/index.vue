@@ -30,7 +30,7 @@
     <el-card shadow="never">
       <template #header>
         <el-row :gutter="10" class="mb8">
-          <!-- <el-col :span="1.5">
+          <el-col :span="1.5">
             <el-button v-hasPermi="['system:ipWhiteList:add']" type="primary" plain icon="Plus" @click="handleAdd">新增</el-button>
           </el-col>
           <el-col :span="1.5">
@@ -43,27 +43,30 @@
               >删除</el-button
             >
           </el-col>
-          <el-col :span="1.5">
-            <el-button v-hasPermi="['system:ipWhiteList:export']" type="warning" plain icon="Download" @click="handleExport">导出</el-button>
-          </el-col> -->
+          <!--          <el-col :span="1.5">-->
+          <!--            <el-button v-hasPermi="['system:ipWhiteList:export']" type="warning" plain icon="Download" @click="handleExport">导出</el-button>-->
+          <!--          </el-col>-->
           <right-toolbar v-model:showSearch="showSearch" @query-table="getList"></right-toolbar>
         </el-row>
       </template>
 
       <el-table v-loading="loading" :data="ipWhiteListList" @selection-change="handleSelectionChange">
-        <!-- <el-table-column type="selection" width="55" align="center" />
-        <el-table-column v-if="true" label="主键ID" align="center" prop="id" /> -->
+        <el-table-column type="selection" width="55" align="center" />
+        <!-- <el-table-column v-if="true" label="主键ID" align="center" prop="id" /> -->
         <el-table-column label="IP地址" align="center" prop="ipAddress" />
-        <el-table-column label="备注说明" align="center" prop="description" />
+        <el-table-column label="描述" align="center" prop="description" />
         <el-table-column label="状态" align="center" prop="status">
           <template #default="scope">
             <dict-tag :options="ip_white_status" :value="scope.row.status" />
           </template>
         </el-table-column>
-        <!-- <el-table-column label="部门ID" align="center" prop="deptId" />
-        <el-table-column label="备注" align="center" prop="remark" /> -->
+        <!-- <el-table-column label="部门ID" align="center" prop="deptId" /> -->
+        <el-table-column label="备注" align="center" prop="remark" />
         <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
           <template #default="scope">
+            <el-tooltip content="修改" placement="top">
+              <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['msg:ipWhiteList:edit']"></el-button>
+            </el-tooltip>
             <el-tooltip v-if="scope.row.status === 0" content="授权" placement="top">
               <el-button v-hasPermi="['system:ipWhiteList:authorize']" link type="primary" @click="handleAuthorize(scope.row)">
                 <template #default>
@@ -93,11 +96,16 @@
         <el-form-item label="IP地址" prop="ipAddress">
           <el-input v-model="form.ipAddress" placeholder="请输入IP地址或CIDR网段" />
         </el-form-item>
-        <el-form-item label="备注说明" prop="description">
-          <el-input v-model="form.description" placeholder="请输入备注说明" />
+        <el-form-item label="描述" prop="description">
+          <el-input v-model="form.description" placeholder="请输入描述" />
         </el-form-item>
-        <el-form-item label="部门ID" prop="deptId">
-          <el-input v-model="form.deptId" placeholder="请输入部门ID" />
+        <!--        <el-form-item label="部门ID" prop="deptId">-->
+        <!--          <el-input v-model="form.deptId" placeholder="请输入部门ID" />-->
+        <!--        </el-form-item>-->
+        <el-form-item label="状态" prop="status">
+          <el-select v-model="form.status" placeholder="请选择状态" clearable>
+            <el-option v-for="dict in ip_white_status" :key="dict.value" :label="dict.label" :value="dict.value" />
+          </el-select>
         </el-form-item>
         <el-form-item label="备注" prop="remark">
           <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
@@ -262,7 +270,7 @@ const handleAuthorize = async (row) => {
   await updateIpWhiteList({
     ...row,
     status: 1,
-    description: '授权成功'
+    remark: '授权成功'
   });
   proxy?.$modal.msgSuccess('操作成功');
   getList();
@@ -272,7 +280,7 @@ const handleCancelAuthorize = async (row) => {
   await updateIpWhiteList({
     ...row,
     status: 0,
-    description: '授权取消'
+    remark: '授权取消'
   });
   proxy?.$modal.msgSuccess('操作成功');
   getList();

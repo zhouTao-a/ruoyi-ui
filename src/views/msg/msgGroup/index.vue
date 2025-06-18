@@ -46,8 +46,8 @@
         <el-table-column label="分组名称" align="center" prop="groupName" min-width="100" />
         <el-table-column label="分组编码" align="center" prop="groupCode" min-width="100" />
         <el-table-column label="默认参考用户ID" align="center" prop="defaultTargetUserId" v-if="false" />
-        <el-table-column label="参考用户名称" align="center" prop="defaultTargetUserName" min-width="100" />
-        <el-table-column label="参考用户代码" align="center" prop="defaultTargetUserCode" min-width="100" />
+        <el-table-column label="参考用户名称" align="center" prop="defaultTargetUserName" min-width="100" v-if="false" />
+        <el-table-column label="参考用户代码" align="center" prop="defaultTargetUserCode" min-width="100" v-if="false" />
         <el-table-column label="操作" align="center" class-name="small-padding fixed-width" min-width="100">
           <template #default="scope">
             <el-tooltip content="修改" placement="top">
@@ -79,34 +79,34 @@
             </template>
           </el-input>
         </el-form-item>
-        <el-form-item label="分组编码" prop="groupCode">
+        <el-form-item style="margin-bottom: 2px" label="分组编码" prop="groupCode">
           <el-input class="form-input" :disabled="isDetailView" v-model="form.groupCode" placeholder="请输入分组编码">
             <template #prefix>
               <i class="iconfont icon-renyuanfenzu"></i>
             </template>
           </el-input>
         </el-form-item>
-        <el-form-item style="margin-bottom: 2px" label="参考用户" prop="defaultTargetUserId">
-          <el-select
-            class="form-input"
-            :disabled="isDetailView"
-            v-model="form.defaultTargetUserId"
-            placeholder="请选择参考用户"
-            filterable
-            remote
-            clearable
-            :remote-method="fetchUserOptions"
-            :loading="loadingUser"
-            :default-first-option="true"
-            @change="handleUserChange"
-            @blur="handleUserBlur"
-          >
-            <el-option v-for="user in userOptions" :key="user.id" :label="`${user.userName}（${user.userCode}）`" :value="user.id" />
-            <template #prefix>
-              <i class="iconfont icon-xingming"></i>
-            </template>
-          </el-select>
-        </el-form-item>
+        <!--        <el-form-item style="margin-bottom: 2px" label="参考用户" prop="defaultTargetUserId">-->
+        <!--          <el-select-->
+        <!--            class="form-input"-->
+        <!--            :disabled="isDetailView"-->
+        <!--            v-model="form.defaultTargetUserId"-->
+        <!--            placeholder="请选择参考用户"-->
+        <!--            filterable-->
+        <!--            remote-->
+        <!--            clearable-->
+        <!--            :remote-method="fetchUserOptions"-->
+        <!--            :loading="loadingUser"-->
+        <!--            :default-first-option="true"-->
+        <!--            @change="handleUserChange"-->
+        <!--            @blur="handleUserBlur"-->
+        <!--          >-->
+        <!--            <el-option v-for="user in userOptions" :key="user.id" :label="`${user.userName}（${user.userCode}）`" :value="user.id" />-->
+        <!--            <template #prefix>-->
+        <!--              <i class="iconfont icon-xingming"></i>-->
+        <!--            </template>-->
+        <!--          </el-select>-->
+        <!--        </el-form-item>-->
       </el-form>
       <template #footer>
         <div class="dialog-footer">

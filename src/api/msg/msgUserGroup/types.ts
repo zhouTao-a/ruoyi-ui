@@ -20,7 +20,7 @@ export interface MsgUserGroupVO {
   relativeGenerationDiff: number;
 
   /**
-   * 亲缘关系（close, distant, friend, stranger）
+   * 亲缘关系
    */
   kinshipLevel: string;
 
@@ -67,7 +67,7 @@ export interface MsgUserGroupForm extends BaseEntity {
   relativeGenerationDiff?: number;
 
   /**
-   * 亲缘关系（close, distant, friend, stranger）
+   * 亲缘关系
    */
   kinshipLevel?: string;
 
@@ -109,7 +109,7 @@ export interface MsgUserGroupQuery extends PageQuery {
   relativeGenerationDiff?: number;
 
   /**
-   * 亲缘关系（close, distant, friend, stranger）
+   * 亲缘关系
    */
   kinshipLevel?: string;
 

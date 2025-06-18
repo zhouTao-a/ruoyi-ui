@@ -8,17 +8,12 @@
               <el-input v-model="queryParams.dayName" placeholder="请输入事件名称" clearable @keyup.enter="handleQuery" />
             </el-form-item>
             <el-form-item label="事件类型" prop="dayType">
-              <el-select v-model="queryParams.dayType" placeholder="请选择事件类型" clearable >
-                <el-option v-for="dict in day_type" :key="dict.value" :label="dict.label" :value="dict.value"/>
+              <el-select v-model="queryParams.dayType" placeholder="请选择事件类型" clearable>
+                <el-option v-for="dict in day_type" :key="dict.value" :label="dict.label" :value="dict.value" />
               </el-select>
             </el-form-item>
             <el-form-item label="下次通知时间" prop="nextNotifyTime">
-              <el-date-picker clearable
-                v-model="queryParams.nextNotifyTime"
-                type="date"
-                value-format="YYYY-MM-DD"
-                placeholder="请选择下次通知时间"
-              />
+              <el-date-picker clearable v-model="queryParams.nextNotifyTime" type="date" value-format="YYYY-MM-DD" placeholder="请选择下次通知时间" />
             </el-form-item>
             <el-form-item>
               <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
@@ -36,10 +31,14 @@
             <el-button type="primary" plain icon="Plus" @click="handleAdd" v-hasPermi="['msg:msgDayMatter:add']">新增</el-button>
           </el-col>
           <el-col :span="1.5">
-            <el-button type="success" plain icon="Edit" :disabled="single" @click="handleUpdate()" v-hasPermi="['msg:msgDayMatter:edit']">修改</el-button>
+            <el-button type="success" plain icon="Edit" :disabled="single" @click="handleUpdate()" v-hasPermi="['msg:msgDayMatter:edit']"
+              >修改</el-button
+            >
           </el-col>
           <el-col :span="1.5">
-            <el-button type="danger" plain icon="Delete" :disabled="multiple" @click="handleDelete()" v-hasPermi="['msg:msgDayMatter:remove']">删除</el-button>
+            <el-button type="danger" plain icon="Delete" :disabled="multiple" @click="handleDelete()" v-hasPermi="['msg:msgDayMatter:remove']"
+              >删除</el-button
+            >
           </el-col>
           <el-col :span="1.5">
             <el-button type="warning" plain icon="Download" @click="handleExport" v-hasPermi="['msg:msgDayMatter:export']">导出</el-button>
@@ -59,22 +58,22 @@
         </el-table-column>
         <el-table-column label="事件类型" align="center" prop="dayType">
           <template #default="scope">
-            <dict-tag :options="day_type" :value="scope.row.dayType"/>
+            <dict-tag :options="day_type" :value="scope.row.dayType" />
           </template>
         </el-table-column>
         <el-table-column label="提醒周期" align="center" prop="remindType">
           <template #default="scope">
-            <dict-tag :options="remind_type" :value="scope.row.remindType"/>
+            <dict-tag :options="remind_type" :value="scope.row.remindType" />
           </template>
         </el-table-column>
         <el-table-column label="是否重复提醒" align="center" prop="repeatFlag">
           <template #default="scope">
-            <dict-tag :options="whether_flag" :value="scope.row.repeatFlag"/>
+            <dict-tag :options="whether_flag" :value="scope.row.repeatFlag" />
           </template>
         </el-table-column>
         <el-table-column label="通知状态" align="center" prop="notifyStatus">
           <template #default="scope">
-            <dict-tag :options="notify_status" :value="scope.row.notifyStatus"/>
+            <dict-tag :options="notify_status" :value="scope.row.notifyStatus" />
           </template>
         </el-table-column>
         <el-table-column label="下次通知时间" align="center" prop="nextNotifyTime" width="180">
@@ -105,31 +104,17 @@
           <el-input v-model="form.dayName" placeholder="请输入事件名称" />
         </el-form-item>
         <el-form-item label="事件目标时间" prop="dayTarget">
-          <el-date-picker clearable
-            v-model="form.dayTarget"
-            type="datetime"
-            value-format="YYYY-MM-DD HH:mm:ss"
-            placeholder="请选择事件目标时间">
+          <el-date-picker clearable v-model="form.dayTarget" type="datetime" value-format="YYYY-MM-DD HH:mm:ss" placeholder="请选择事件目标时间">
           </el-date-picker>
         </el-form-item>
         <el-form-item label="事件类型" prop="dayType">
           <el-select v-model="form.dayType" placeholder="请选择事件类型">
-            <el-option
-                v-for="dict in day_type"
-                :key="dict.value"
-                :label="dict.label"
-                :value="dict.value"
-            ></el-option>
+            <el-option v-for="dict in day_type" :key="dict.value" :label="dict.label" :value="dict.value"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="提醒周期" prop="remindType">
           <el-select v-model="form.remindType" placeholder="请选择提醒周期">
-            <el-option
-                v-for="dict in remind_type"
-                :key="dict.value"
-                :label="dict.label"
-                :value="dict.value"
-            ></el-option>
+            <el-option v-for="dict in remind_type" :key="dict.value" :label="dict.label" :value="dict.value"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="是否重复提醒" prop="repeatFlag">
@@ -137,19 +122,11 @@
         </el-form-item>
         <el-form-item label="通知状态" prop="notifyStatus">
           <el-radio-group v-model="form.notifyStatus">
-            <el-radio
-              v-for="dict in notify_status"
-              :key="dict.value"
-              :value="dict.value"
-            >{{dict.label}}</el-radio>
+            <el-radio v-for="dict in notify_status" :key="dict.value" :value="dict.value">{{ dict.label }}</el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="下次通知时间" prop="nextNotifyTime">
-          <el-date-picker clearable
-            v-model="form.nextNotifyTime"
-            type="datetime"
-            value-format="YYYY-MM-DD HH:mm:ss"
-            placeholder="请选择下次通知时间">
+          <el-date-picker clearable v-model="form.nextNotifyTime" type="datetime" value-format="YYYY-MM-DD HH:mm:ss" placeholder="请选择下次通知时间">
           </el-date-picker>
         </el-form-item>
       </el-form>
@@ -198,10 +175,10 @@ const initFormData: MsgDayMatterForm = {
   notifyStatus: undefined,
   nextNotifyTime: undefined,
   userId: undefined,
-  groupId: undefined,
-}
+  groupId: undefined
+};
 const data = reactive<PageData<MsgDayMatterForm, MsgDayMatterQuery>>({
-  form: {...initFormData},
+  form: { ...initFormData },
   queryParams: {
     pageNum: 1,
     pageSize: 10,
@@ -210,37 +187,16 @@ const data = reactive<PageData<MsgDayMatterForm, MsgDayMatterQuery>>({
     nextNotifyTime: undefined,
     userId: undefined,
     groupId: undefined,
-    params: {
-    }
+    params: {}
   },
   rules: {
-    id: [
-      { required: true, message: "主键ID不能为空", trigger: "blur" }
-    ],
-    dayName: [
-      { required: true, message: "事件名称不能为空", trigger: "blur" }
-    ],
-    dayTarget: [
-      { required: true, message: "事件目标时间不能为空", trigger: "blur" }
-    ],
-    dayType: [
-      { required: true, message: "事件类型不能为空", trigger: "change" }
-    ],
-    remindType: [
-      { required: true, message: "提醒周期不能为空", trigger: "change" }
-    ],
-    repeatFlag: [
-      { required: true, message: "是否重复提醒不能为空", trigger: "blur" }
-    ],
-    notifyStatus: [
-      { required: true, message: "通知状态不能为空", trigger: "change" }
-    ],
-    userId: [
-      { required: true, message: "所属用户ID不能为空", trigger: "change" }
-    ],
-    groupId: [
-      { required: true, message: "所属分组ID不能为空", trigger: "change" }
-    ],
+    id: [{ required: true, message: '主键ID不能为空', trigger: 'blur' }],
+    dayName: [{ required: true, message: '事件名称不能为空', trigger: 'blur' }],
+    dayTarget: [{ required: true, message: '事件目标时间不能为空', trigger: 'blur' }],
+    dayType: [{ required: true, message: '事件类型不能为空', trigger: 'change' }],
+    remindType: [{ required: true, message: '提醒周期不能为空', trigger: 'change' }],
+    repeatFlag: [{ required: true, message: '是否重复提醒不能为空', trigger: 'blur' }],
+    notifyStatus: [{ required: true, message: '通知状态不能为空', trigger: 'change' }]
   }
 });
 
@@ -255,56 +211,56 @@ const getList = async () => {
   msgDayMatterList.value = res.rows;
   total.value = res.total;
   loading.value = false;
-}
+};
 
 /** 取消按钮 */
 const cancel = () => {
   reset();
   dialog.visible = false;
-}
+};
 
 /** 表单重置 */
 const reset = () => {
-  form.value = {...initFormData};
+  form.value = { ...initFormData };
   msgDayMatterFormRef.value?.resetFields();
-}
+};
 
 /** 搜索按钮操作 */
 const handleQuery = () => {
   queryParams.value.pageNum = 1;
   getList();
-}
+};
 
 /** 重置按钮操作 */
 const resetQuery = () => {
   dateRangeDayTarget.value = ['', ''];
   queryFormRef.value?.resetFields();
   handleQuery();
-}
+};
 
 /** 多选框选中数据 */
 const handleSelectionChange = (selection: MsgDayMatterVO[]) => {
-  ids.value = selection.map(item => item.id);
+  ids.value = selection.map((item) => item.id);
   single.value = selection.length != 1;
   multiple.value = !selection.length;
-}
+};
 
 /** 新增按钮操作 */
 const handleAdd = () => {
   reset();
   dialog.visible = true;
-  dialog.title = "添加事件";
-}
+  dialog.title = '添加事件';
+};
 
 /** 修改按钮操作 */
 const handleUpdate = async (row?: MsgDayMatterVO) => {
   reset();
-  const _id = row?.id || ids.value[0]
+  const _id = row?.id || ids.value[0];
   const res = await getMsgDayMatter(_id);
   Object.assign(form.value, res.data);
   dialog.visible = true;
-  dialog.title = "修改事件";
-}
+  dialog.title = '修改事件';
+};
 
 /** 提交按钮 */
 const submitForm = () => {
@@ -312,32 +268,36 @@ const submitForm = () => {
     if (valid) {
       buttonLoading.value = true;
       if (form.value.id) {
-        await updateMsgDayMatter(form.value).finally(() =>  buttonLoading.value = false);
+        await updateMsgDayMatter(form.value).finally(() => (buttonLoading.value = false));
       } else {
-        await addMsgDayMatter(form.value).finally(() =>  buttonLoading.value = false);
+        await addMsgDayMatter(form.value).finally(() => (buttonLoading.value = false));
       }
-      proxy?.$modal.msgSuccess("操作成功");
+      proxy?.$modal.msgSuccess('操作成功');
       dialog.visible = false;
       await getList();
     }
   });
-}
+};
 
 /** 删除按钮操作 */
 const handleDelete = async (row?: MsgDayMatterVO) => {
   const _ids = row?.id || ids.value;
-  await proxy?.$modal.confirm('是否确认删除事件编号为"' + _ids + '"的数据项？').finally(() => loading.value = false);
+  await proxy?.$modal.confirm('是否确认删除事件编号为"' + _ids + '"的数据项？').finally(() => (loading.value = false));
   await delMsgDayMatter(_ids);
-  proxy?.$modal.msgSuccess("删除成功");
+  proxy?.$modal.msgSuccess('删除成功');
   await getList();
-}
+};
 
 /** 导出按钮操作 */
 const handleExport = () => {
-  proxy?.download('msg/msgDayMatter/export', {
-    ...queryParams.value
-  }, `msgDayMatter_${new Date().getTime()}.xlsx`)
-}
+  proxy?.download(
+    'msg/msgDayMatter/export',
+    {
+      ...queryParams.value
+    },
+    `msgDayMatter_${new Date().getTime()}.xlsx`
+  );
+};
 
 onMounted(() => {
   getList();

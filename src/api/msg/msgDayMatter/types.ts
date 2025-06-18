@@ -40,15 +40,19 @@ export interface MsgDayMatterVO {
   nextNotifyTime: string;
 
   /**
-   * 所属用户ID
-   */
-  userId: string | number;
-
-  /**
    * 所属分组ID
    */
   groupId: string | number;
 
+  /**
+   * 分组名称
+   */
+  groupName: string;
+
+  /**
+   * 分组代码
+   */
+  groupCode: string;
 }
 
 export interface MsgDayMatterForm extends BaseEntity {
@@ -102,10 +106,18 @@ export interface MsgDayMatterForm extends BaseEntity {
    */
   groupId?: string | number;
 
+  /**
+   * 分组名称
+   */
+  groupName: string;
+
+  /**
+   * 分组代码
+   */
+  groupCode: string;
 }
 
 export interface MsgDayMatterQuery extends PageQuery {
-
   /**
    * 事件名称
    */
@@ -117,25 +129,32 @@ export interface MsgDayMatterQuery extends PageQuery {
   dayType?: string;
 
   /**
-   * 下次通知时间
-   */
-  nextNotifyTime?: string;
-
-  /**
-   * 所属用户ID
-   */
-  userId?: string | number;
-
-  /**
    * 所属分组ID
    */
   groupId?: string | number;
 
-    /**
-     * 日期范围参数
-     */
-    params?: any;
+  /**
+   * 日期范围参数
+   */
+  params?: any;
 }
 
+/**
+ * 分组信息
+ */
+export interface GroupVo {
+  /**
+   * 分组ID
+   */
+  id: string | number;
 
+  /**
+   * 分组名称
+   */
+  groupName: string;
 
+  /**
+   * 分组代码
+   */
+  groupCode: string;
+}
