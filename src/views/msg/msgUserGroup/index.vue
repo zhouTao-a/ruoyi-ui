@@ -154,16 +154,10 @@
 </template>
 
 <script setup name="MsgUserGroup" lang="ts">
-import {
-  listMsgUserGroup,
-  getMsgUserGroup,
-  delMsgUserGroup,
-  addMsgUserGroup,
-  updateMsgUserGroup,
-  groupCodeList,
-  userCodeList
-} from '@/api/msg/msgUserGroup';
-import { MsgUserGroupVO, MsgUserGroupQuery, MsgUserGroupForm, GroupVo, UserVo } from '@/api/msg/msgUserGroup/types';
+import { listMsgUserGroup, getMsgUserGroup, delMsgUserGroup, addMsgUserGroup, updateMsgUserGroup } from '@/api/msg/msgUserGroup';
+import { userCodeList, groupCodeList } from '@/api/msg/common';
+import { GroupVo, UserVo } from '@/api/msg/common/types';
+import { MsgUserGroupVO, MsgUserGroupQuery, MsgUserGroupForm } from '@/api/msg/msgUserGroup/types';
 import { ref, reactive, toRefs, getCurrentInstance, onMounted } from 'vue';
 
 const { proxy } = getCurrentInstance() as ComponentInternalInstance;

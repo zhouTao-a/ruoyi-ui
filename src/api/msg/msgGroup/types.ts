@@ -73,23 +73,3 @@ export interface MsgGroupQuery extends PageQuery {
    */
   params?: any;
 }
-
-/**
- * 用户信息
- */
-export interface UserVo {
-  /**
-   * 用户ID
-   */
-  id: string | number;
-
-  /**
-   * 用户名称
-   */
-  userName: string;
-
-  /**
-   * 用户代码
-   */
-  userCode: string;
-}

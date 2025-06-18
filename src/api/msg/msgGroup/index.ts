@@ -61,14 +61,3 @@ export const delMsgGroup = (id: string | number | Array<string | number>) => {
     method: 'delete'
   });
 };
-
-/**
- * 获取用户列表
- */
-export function userCodeList(params?: { userName?: string; id?: string | number }) {
-  return request({
-    url: '/msg/msgUser/userCodeList',
-    method: 'get',
-    params: params
-  });
-}

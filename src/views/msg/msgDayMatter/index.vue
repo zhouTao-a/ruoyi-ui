@@ -5,15 +5,17 @@
         <el-card shadow="hover">
           <el-form ref="queryFormRef" :model="queryParams" :inline="true">
             <el-form-item label="事件名称" prop="dayName">
-              <el-input v-model="queryParams.dayName" placeholder="请输入事件名称" clearable @keyup.enter="handleQuery" />
+              <el-input style="width: 200px" v-model="queryParams.dayName" placeholder="请输入事件名称" clearable @keyup.enter="handleQuery" />
             </el-form-item>
             <el-form-item label="事件类型" prop="dayType">
-              <el-select v-model="queryParams.dayType" placeholder="请选择事件类型" clearable>
+              <el-select style="width: 200px" v-model="queryParams.dayType" placeholder="请选择事件类型" clearable>
                 <el-option v-for="dict in day_type" :key="dict.value" :label="dict.label" :value="dict.value" />
               </el-select>
             </el-form-item>
-            <el-form-item label="下次通知时间" prop="nextNotifyTime">
-              <el-date-picker clearable v-model="queryParams.nextNotifyTime" type="date" value-format="YYYY-MM-DD" placeholder="请选择下次通知时间" />
+            <el-form-item label="用户" prop="userId">
+              <el-select v-model="queryParams.userId" placeholder="请选择用户" clearable filterable style="width: 200px">
+                <el-option v-for="user in userOptions" :key="user.id" :label="`${user.userName}（${user.userCode}）`" :value="user.id" />
+              </el-select>
             </el-form-item>
             <el-form-item>
               <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
@@ -49,11 +51,11 @@
 
       <el-table v-loading="loading" :data="msgDayMatterList" @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" align="center" />
-        <el-table-column label="主键ID" align="center" prop="id" v-if="true" />
+        <el-table-column label="主键ID" align="center" prop="id" v-if="false" />
         <el-table-column label="事件名称" align="center" prop="dayName" />
-        <el-table-column label="事件目标时间" align="center" prop="dayTarget" width="180">
+        <el-table-column label="事件时间" align="center" prop="dayTarget" width="180">
           <template #default="scope">
-            <span>{{ parseTime(scope.row.dayTarget, '{y}-{m}-{d}') }}</span>
+            <span>{{ parseTime(scope.row.dayTarget, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
           </template>
         </el-table-column>
         <el-table-column label="事件类型" align="center" prop="dayType">
@@ -66,7 +68,7 @@
             <dict-tag :options="remind_type" :value="scope.row.remindType" />
           </template>
         </el-table-column>
-        <el-table-column label="是否重复提醒" align="center" prop="repeatFlag">
+        <el-table-column label="重复提醒" align="center" prop="repeatFlag">
           <template #default="scope">
             <dict-tag :options="whether_flag" :value="scope.row.repeatFlag" />
           </template>
@@ -76,13 +78,17 @@
             <dict-tag :options="notify_status" :value="scope.row.notifyStatus" />
           </template>
         </el-table-column>
-        <el-table-column label="下次通知时间" align="center" prop="nextNotifyTime" width="180">
+        <el-table-column label="通知时间" align="center" prop="nextNotifyTime" width="180">
           <template #default="scope">
-            <span>{{ parseTime(scope.row.nextNotifyTime, '{y}-{m}-{d}') }}</span>
+            <span>{{ parseTime(scope.row.nextNotifyTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="所属用户ID" align="center" prop="userId" />
-        <el-table-column label="所属分组ID" align="center" prop="groupId" />
+        <el-table-column label="用户" align="center" prop="userId" v-if="false" />
+        <el-table-column label="用户名称" align="center" prop="userName" min-width="100" />
+        <el-table-column label="用户代码" align="center" prop="userCode" min-width="100" />
+        <el-table-column label="分组名称" align="center" prop="groupName" min-width="100" />
+        <el-table-column label="分组代码" align="center" prop="groupCode" min-width="100" />
+        <el-table-column label="分组信息" align="center" prop="groupId" v-if="false" />
         <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
           <template #default="scope">
             <el-tooltip content="修改" placement="top">
@@ -103,8 +109,8 @@
         <el-form-item label="事件名称" prop="dayName">
           <el-input v-model="form.dayName" placeholder="请输入事件名称" />
         </el-form-item>
-        <el-form-item label="事件目标时间" prop="dayTarget">
-          <el-date-picker clearable v-model="form.dayTarget" type="datetime" value-format="YYYY-MM-DD HH:mm:ss" placeholder="请选择事件目标时间">
+        <el-form-item label="事件时间" prop="dayTarget">
+          <el-date-picker clearable v-model="form.dayTarget" type="datetime" value-format="YYYY-MM-DD HH:mm:ss" placeholder="请选择事件时间">
           </el-date-picker>
         </el-form-item>
         <el-form-item label="事件类型" prop="dayType">
@@ -117,17 +123,26 @@
             <el-option v-for="dict in remind_type" :key="dict.value" :label="dict.label" :value="dict.value"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="是否重复提醒" prop="repeatFlag">
-          <el-input v-model="form.repeatFlag" placeholder="请输入是否重复提醒" />
+        <el-form-item label="重复提醒" prop="repeatFlag">
+          <el-input v-model="form.repeatFlag" placeholder="请输入重复提醒" />
         </el-form-item>
         <el-form-item label="通知状态" prop="notifyStatus">
           <el-radio-group v-model="form.notifyStatus">
             <el-radio v-for="dict in notify_status" :key="dict.value" :value="dict.value">{{ dict.label }}</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="下次通知时间" prop="nextNotifyTime">
-          <el-date-picker clearable v-model="form.nextNotifyTime" type="datetime" value-format="YYYY-MM-DD HH:mm:ss" placeholder="请选择下次通知时间">
-          </el-date-picker>
+        <el-form-item label="用户" prop="userId">
+          <el-select v-model="form.userId" placeholder="请选择用户" clearable filterable>
+            <el-option v-for="user in userOptions" :key="user.id" :label="`${user.userName}（${user.userCode}）`" :value="user.id" />
+          </el-select>
+        </el-form-item>
+        <el-form-item style="margin-bottom: 2px" label="分组" prop="groupId">
+          <el-select class="form-input" v-model="form.groupId" placeholder="请选择分组" clearable filterable multiple>
+            <template #prefix>
+              <i class="iconfont icon-renyuanfenzu"></i>
+            </template>
+            <el-option v-for="group in groupOptions" :key="group.id" :label="`${group.groupName}（${group.groupCode}）`" :value="group.id" />
+          </el-select>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -143,9 +158,14 @@
 <script setup name="MsgDayMatter" lang="ts">
 import { listMsgDayMatter, getMsgDayMatter, delMsgDayMatter, addMsgDayMatter, updateMsgDayMatter } from '@/api/msg/msgDayMatter';
 import { MsgDayMatterVO, MsgDayMatterQuery, MsgDayMatterForm } from '@/api/msg/msgDayMatter/types';
+import { onMounted, ref } from 'vue';
+import { userCodeList, groupCodeList } from '@/api/msg/common';
+import { GroupVo, UserVo } from '@/api/msg/common/types';
 
 const { proxy } = getCurrentInstance() as ComponentInternalInstance;
-const { remind_type, day_type, notify_status } = toRefs<any>(proxy?.useDict('remind_type', 'day_type', 'notify_status'));
+const { remind_type, day_type, notify_status, whether_flag } = toRefs<any>(
+  proxy?.useDict('remind_type', 'day_type', 'notify_status', 'whether_flag')
+);
 
 const msgDayMatterList = ref<MsgDayMatterVO[]>([]);
 const buttonLoading = ref(false);
@@ -173,9 +193,12 @@ const initFormData: MsgDayMatterForm = {
   remindType: undefined,
   repeatFlag: undefined,
   notifyStatus: undefined,
-  nextNotifyTime: undefined,
   userId: undefined,
-  groupId: undefined
+  groupId: undefined,
+  groupName: undefined,
+  groupCode: undefined,
+  userName: undefined,
+  userCode: undefined
 };
 const data = reactive<PageData<MsgDayMatterForm, MsgDayMatterQuery>>({
   form: { ...initFormData },
@@ -184,23 +207,38 @@ const data = reactive<PageData<MsgDayMatterForm, MsgDayMatterQuery>>({
     pageSize: 10,
     dayName: undefined,
     dayType: undefined,
-    nextNotifyTime: undefined,
     userId: undefined,
-    groupId: undefined,
     params: {}
   },
   rules: {
     id: [{ required: true, message: '主键ID不能为空', trigger: 'blur' }],
     dayName: [{ required: true, message: '事件名称不能为空', trigger: 'blur' }],
-    dayTarget: [{ required: true, message: '事件目标时间不能为空', trigger: 'blur' }],
+    dayTarget: [{ required: true, message: '事件时间不能为空', trigger: 'blur' }],
     dayType: [{ required: true, message: '事件类型不能为空', trigger: 'change' }],
     remindType: [{ required: true, message: '提醒周期不能为空', trigger: 'change' }],
-    repeatFlag: [{ required: true, message: '是否重复提醒不能为空', trigger: 'blur' }],
+    repeatFlag: [{ required: true, message: '重复提醒不能为空', trigger: 'blur' }],
     notifyStatus: [{ required: true, message: '通知状态不能为空', trigger: 'change' }]
   }
 });
 
 const { queryParams, form, rules } = toRefs(data);
+
+// 定义分组列表数据
+const groupOptions = ref<GroupVo[]>([]);
+const userOptions = ref<UserVo[]>([]);
+
+// 获取分组列表
+const fetchGroupAndUserOptions = async () => {
+  const res = await groupCodeList();
+  groupOptions.value = res.data || [];
+  const user = await userCodeList();
+  userOptions.value = user.data || [];
+};
+
+// 页面加载时获取分组数据
+onMounted(() => {
+  fetchGroupAndUserOptions();
+});
 
 /** 查询事件列表 */
 const getList = async () => {

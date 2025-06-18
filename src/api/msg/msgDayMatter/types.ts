@@ -10,7 +10,7 @@ export interface MsgDayMatterVO {
   dayName: string;
 
   /**
-   * 事件目标时间（含时分）
+   * 事件时间（含时分）
    */
   dayTarget: string;
 
@@ -25,7 +25,7 @@ export interface MsgDayMatterVO {
   remindType: string;
 
   /**
-   * 是否重复提醒（T/F）
+   * 重复提醒（T/F）
    */
   repeatFlag: string;
 
@@ -35,12 +35,12 @@ export interface MsgDayMatterVO {
   notifyStatus: string;
 
   /**
-   * 下次通知时间
+   * 通知时间
    */
   nextNotifyTime: string;
 
   /**
-   * 所属分组ID
+   * 分组信息
    */
   groupId: string | number;
 
@@ -53,6 +53,21 @@ export interface MsgDayMatterVO {
    * 分组代码
    */
   groupCode: string;
+
+  /**
+   * 分组信息
+   */
+  userId: string | number;
+
+  /**
+   * 用户名称
+   */
+  userName: string;
+
+  /**
+   * 用户代码
+   */
+  userCode: string;
 }
 
 export interface MsgDayMatterForm extends BaseEntity {
@@ -67,7 +82,7 @@ export interface MsgDayMatterForm extends BaseEntity {
   dayName?: string;
 
   /**
-   * 事件目标时间（含时分）
+   * 事件时间（含时分）
    */
   dayTarget?: string;
 
@@ -82,7 +97,7 @@ export interface MsgDayMatterForm extends BaseEntity {
   remindType?: string;
 
   /**
-   * 是否重复提醒（T/F）
+   * 重复提醒（T/F）
    */
   repeatFlag?: string;
 
@@ -92,17 +107,27 @@ export interface MsgDayMatterForm extends BaseEntity {
   notifyStatus?: string;
 
   /**
-   * 下次通知时间
+   * 通知时间
    */
   nextNotifyTime?: string;
 
   /**
-   * 所属用户ID
+   * 用户
    */
   userId?: string | number;
 
   /**
-   * 所属分组ID
+   * 用户名称
+   */
+  userName: string;
+
+  /**
+   * 用户代码
+   */
+  userCode: string;
+
+  /**
+   * 分组信息
    */
   groupId?: string | number;
 
@@ -129,32 +154,12 @@ export interface MsgDayMatterQuery extends PageQuery {
   dayType?: string;
 
   /**
-   * 所属分组ID
+   * 用户
    */
-  groupId?: string | number;
+  userId?: string | number;
 
   /**
    * 日期范围参数
    */
   params?: any;
-}
-
-/**
- * 分组信息
- */
-export interface GroupVo {
-  /**
-   * 分组ID
-   */
-  id: string | number;
-
-  /**
-   * 分组名称
-   */
-  groupName: string;
-
-  /**
-   * 分组代码
-   */
-  groupCode: string;
 }

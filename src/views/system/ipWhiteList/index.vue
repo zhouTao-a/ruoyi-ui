@@ -82,7 +82,7 @@
               </el-button>
             </el-tooltip>
             <el-tooltip v-if="scope.row.status === 0" content="删除" placement="top">
-              <el-button v-hasPermi="['system:ipWhiteList:delete']" link type="primary" @click="handleDelete(scope.row)">删除</el-button>
+              <el-button plain icon="Delete" v-hasPermi="['system:ipWhiteList:delete']" link type="primary" @click="handleDelete(scope.row)" />
             </el-tooltip>
           </template>
         </el-table-column>

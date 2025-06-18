@@ -119,8 +119,10 @@
 </template>
 
 <script setup name="MsgGroup" lang="ts">
-import { listMsgGroup, getMsgGroup, delMsgGroup, addMsgGroup, updateMsgGroup, userCodeList } from '@/api/msg/msgGroup';
-import { MsgGroupVO, MsgGroupQuery, MsgGroupForm, UserVo } from '@/api/msg/msgGroup/types';
+import { listMsgGroup, getMsgGroup, delMsgGroup, addMsgGroup, updateMsgGroup } from '@/api/msg/msgGroup';
+import { userCodeList } from '@/api/msg/common';
+import { UserVo } from '@/api/msg/common/types';
+import { MsgGroupVO, MsgGroupQuery, MsgGroupForm } from '@/api/msg/msgGroup/types';
 import { ref, reactive, toRefs, getCurrentInstance, onMounted, nextTick } from 'vue';
 import { ElInput } from 'element-plus';
 
