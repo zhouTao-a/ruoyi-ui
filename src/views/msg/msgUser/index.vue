@@ -7,6 +7,9 @@
             <el-form-item label="用户名" prop="userName">
               <el-input v-model="queryParams.userName" placeholder="请输入用户名" clearable @keyup.enter="handleQuery" style="width: 200px" />
             </el-form-item>
+            <el-form-item label="用户编码" prop="userCode">
+              <el-input v-model="queryParams.userCode" placeholder="请输入用户编码" clearable @keyup.enter="handleQuery" style="width: 200px" />
+            </el-form-item>
             <el-form-item label="手机号" prop="phoneNumber">
               <el-input v-model="queryParams.phoneNumber" placeholder="请输入手机号" clearable @keyup.enter="handleQuery" style="width: 200px" />
             </el-form-item>
@@ -43,25 +46,32 @@
       <el-table v-loading="loading" :data="msgUserList" @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" align="center" />
         <el-table-column label="主键ID" align="center" prop="id" v-if="false" />
-        <el-table-column label="用户名" align="center" prop="userName" show-overflow-tooltip min-width="80" />
+        <el-table-column label="用户名" align="center" prop="userName" show-overflow-tooltip min-width="100" />
         <el-table-column label="用户编码" align="center" prop="userCode" show-overflow-tooltip min-width="80" />
         <el-table-column label="性别" align="center" prop="gender" min-width="50">
           <template #default="scope">
             <dict-tag :options="sys_user_sex" :value="scope.row.gender" />
           </template>
         </el-table-column>
-        <el-table-column label="身份证号" align="center" prop="idCard" show-overflow-tooltip min-width="170" />
+        <el-table-column label="父亲ID" align="center" prop="fatherId" v-if="false" />
+        <el-table-column label="父亲" align="center" min-width="160" show-overflow-tooltip>
+          <template #default="{ row }">
+            {{ row.fatherName }}<span v-if="row.fatherCode">（{{ row.fatherCode }}）</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="母亲ID" align="center" prop="motherId" v-if="false" />
+        <el-table-column label="母亲" align="center" min-width="160" show-overflow-tooltip>
+          <template #default="{ row }">
+            {{ row.motherName }}<span v-if="row.motherCode">（{{ row.motherCode }}）</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="配偶ID" align="center" prop="spouseId" v-if="false" />
+        <el-table-column label="配偶" align="center" min-width="160" show-overflow-tooltip>
+          <template #default="{ row }">
+            {{ row.spouseName }}<span v-if="row.spouseCode">（{{ row.spouseCode }}）</span>
+          </template>
+        </el-table-column>
         <el-table-column label="手机号" align="center" prop="phoneNumber" show-overflow-tooltip min-width="170" />
-        <el-table-column label="生日" align="center" prop="birthday" min-width="170">
-          <template #default="scope">
-            <span>{{ parseTime(scope.row.birthday, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="农历生日" align="center" prop="lunarBirthday" min-width="170">
-          <template #default="scope">
-            <span>{{ parseTime(scope.row.lunarBirthday, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
-          </template>
-        </el-table-column>
         <el-table-column label="邮箱地址" align="center" prop="email" show-overflow-tooltip min-width="160" />
         <el-table-column label="短信通知" align="center" prop="smsNotifyFlag" min-width="80">
           <template #default="scope">
@@ -73,7 +83,19 @@
             <dict-tag :options="whether_flag" :value="scope.row.emailNotifyFlag" />
           </template>
         </el-table-column>
-        <el-table-column label="操作" align="center" class-name="small-padding fixed-width" min-width="120">
+        <el-table-column label="身份证号" align="center" prop="idCard" show-overflow-tooltip min-width="170" />
+        <el-table-column label="生日" align="center" prop="birthday" min-width="170">
+          <template #default="scope">
+            <span>{{ parseTime(scope.row.birthday, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="农历生日" align="center" prop="lunarBirthday" min-width="170">
+          <template #default="scope">
+            <span>{{ parseTime(scope.row.lunarBirthday, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
+          </template>
+        </el-table-column>
+
+        <el-table-column label="操作" align="center" class-name="small-padding fixed-width" min-width="120" fixed="right">
           <template #default="scope">
             <el-tooltip content="修改" placement="top">
               <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['msg:msgUser:edit']"></el-button>
@@ -292,7 +314,10 @@ const initFormData: MsgUserForm = {
   lunarBirthday: undefined,
   email: undefined,
   smsNotifyFlag: undefined,
-  emailNotifyFlag: undefined
+  emailNotifyFlag: undefined,
+  fatherId: undefined,
+  motherId: undefined,
+  spouseId: undefined
 };
 const data = reactive<PageData<MsgUserForm, MsgUserQuery>>({
   form: { ...initFormData },
@@ -300,6 +325,7 @@ const data = reactive<PageData<MsgUserForm, MsgUserQuery>>({
     pageNum: 1,
     pageSize: 10,
     userName: undefined,
+    userCode: undefined,
     phoneNumber: undefined,
     params: {}
   },

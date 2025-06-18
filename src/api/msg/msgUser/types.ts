@@ -53,6 +53,51 @@ export interface MsgUserVO {
    * 邮箱通知
    */
   emailNotifyFlag: string;
+
+  /**
+   * 父亲ID
+   */
+  fatherId: string | number;
+
+  /**
+   * 父亲名
+   */
+  fatherName: string;
+
+  /**
+   * 父亲代码
+   */
+  fatherCode: string;
+
+  /**
+   * 母亲ID
+   */
+  motherId: string | number;
+
+  /**
+   * 母亲名
+   */
+  motherName: string;
+
+  /**
+   * 母亲代码
+   */
+  motherCode: string;
+
+  /**
+   * 配偶ID
+   */
+  spouseId: string | number;
+
+  /**
+   * 配偶名
+   */
+  spouseName: string;
+
+  /**
+   * 配偶代码
+   */
+  spouseCode: string;
 }
 
 export interface MsgUserForm extends BaseEntity {
@@ -110,6 +155,21 @@ export interface MsgUserForm extends BaseEntity {
    * 邮箱通知
    */
   emailNotifyFlag?: string;
+
+  /**
+   * 父亲ID
+   */
+  fatherId: string | number;
+
+  /**
+   * 母亲ID
+   */
+  motherId: string | number;
+
+  /**
+   * 配偶ID
+   */
+  spouseId: string | number;
 }
 
 export interface MsgUserQuery extends PageQuery {
@@ -117,6 +177,11 @@ export interface MsgUserQuery extends PageQuery {
    * 用户名
    */
   userName?: string;
+
+  /**
+   * 用户编码
+   */
+  userCode?: string;
 
   /**
    * 手机号
