@@ -102,8 +102,8 @@
     <!-- 添加或修改用户组对话框 -->
     <el-dialog :title="dialog.title" v-model="dialog.visible" width="400px" append-to-body>
       <el-form class="card-container" ref="msgUserGroupFormRef" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="用户" prop="userId">
-          <el-select class="form-input" v-model="form.userId" placeholder="请选择用户" clearable filterable :disabled="isDetailView">
+        <el-form-item label="用户" prop="userIdList">
+          <el-select class="form-input" v-model="form.userIdList" placeholder="请选择用户" clearable filterable multiple :disabled="isDetailView">
             <template #prefix>
               <i class="iconfont icon-xingming"></i>
             </template>
@@ -200,6 +200,7 @@ const dialog = reactive<DialogOption>({
 const initFormData: MsgUserGroupForm = {
   id: undefined,
   userId: undefined,
+  userIdList: [],
   groupId: undefined,
   relativeGenerationDiff: undefined,
   kinshipLevel: undefined
@@ -282,6 +283,7 @@ const handleUpdate = async (row?: MsgUserGroupVO) => {
   const _id = row?.id || ids.value[0];
   const res = await getMsgUserGroup(_id);
   Object.assign(form.value, res.data);
+  form.value.userIdList = [res.data.userId];
   dialog.visible = true;
   dialog.title = '修改用户组';
 };
@@ -294,6 +296,7 @@ const handleDetail = async (row?: MsgUserGroupVO) => {
   const _id = row?.id || ids.value[0];
   const res = await getMsgUserGroup(_id);
   Object.assign(form.value, res.data);
+  form.value.userIdList = [res.data.userId];
   dialog.visible = true;
   dialog.title = '用户组详情';
 };

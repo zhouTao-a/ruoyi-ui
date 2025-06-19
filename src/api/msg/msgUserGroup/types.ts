@@ -57,6 +57,11 @@ export interface MsgUserGroupForm extends BaseEntity {
   userId?: string | number;
 
   /**
+   * 用户List
+   */
+  userIdList?: (string | number)[];
+
+  /**
    * 分组ID
    */
   groupId?: string | number;

@@ -86,9 +86,6 @@
         <el-table-column label="用户" align="center" prop="userId" v-if="false" />
         <el-table-column label="用户名称" align="center" prop="userName" min-width="100" />
         <el-table-column label="用户代码" align="center" prop="userCode" min-width="100" />
-        <el-table-column label="分组名称" align="center" prop="groupName" min-width="100" />
-        <el-table-column label="分组代码" align="center" prop="groupCode" min-width="100" />
-        <el-table-column label="分组信息" align="center" prop="groupId" v-if="false" />
         <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
           <template #default="scope">
             <el-tooltip content="修改" placement="top">
@@ -124,7 +121,12 @@
           </el-select>
         </el-form-item>
         <el-form-item label="重复提醒" prop="repeatFlag">
-          <el-input v-model="form.repeatFlag" placeholder="请输入重复提醒" />
+          <el-select v-model="form.repeatFlag" placeholder="请选择重复提醒" class="select-with-icon">
+            <template #prefix>
+              <i class="iconfont icon-shifoutongzhi"></i>
+            </template>
+            <el-option v-for="dict in whether_flag" :key="dict.value" :label="dict.label" :value="dict.value" />
+          </el-select>
         </el-form-item>
         <el-form-item label="通知状态" prop="notifyStatus">
           <el-radio-group v-model="form.notifyStatus">
@@ -134,14 +136,6 @@
         <el-form-item label="用户" prop="userId">
           <el-select v-model="form.userId" placeholder="请选择用户" clearable filterable>
             <el-option v-for="user in userOptions" :key="user.id" :label="`${user.userName}（${user.userCode}）`" :value="user.id" />
-          </el-select>
-        </el-form-item>
-        <el-form-item style="margin-bottom: 2px" label="分组" prop="groupId">
-          <el-select class="form-input" v-model="form.groupId" placeholder="请选择分组" clearable filterable multiple>
-            <template #prefix>
-              <i class="iconfont icon-renyuanfenzu"></i>
-            </template>
-            <el-option v-for="group in groupOptions" :key="group.id" :label="`${group.groupName}（${group.groupCode}）`" :value="group.id" />
           </el-select>
         </el-form-item>
       </el-form>
@@ -286,6 +280,9 @@ const handleSelectionChange = (selection: MsgDayMatterVO[]) => {
 /** 新增按钮操作 */
 const handleAdd = () => {
   reset();
+  //新增按钮设置初始值
+  form.value.repeatFlag = 'T';
+  form.value.notifyStatus = 'pending';
   dialog.visible = true;
   dialog.title = '添加事件';
 };

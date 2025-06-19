@@ -47,51 +47,40 @@
         <el-table-column type="selection" width="55" align="center" />
         <el-table-column label="主键ID" align="center" prop="id" v-if="false" />
         <el-table-column label="用户名" align="center" prop="userName" show-overflow-tooltip min-width="100" />
-        <el-table-column label="用户编码" align="center" prop="userCode" show-overflow-tooltip min-width="80" />
+        <el-table-column label="用户编码" align="center" prop="userCode" show-overflow-tooltip min-width="100" />
         <el-table-column label="性别" align="center" prop="gender" min-width="50">
           <template #default="scope">
             <dict-tag :options="sys_user_sex" :value="scope.row.gender" />
           </template>
         </el-table-column>
         <el-table-column label="父亲ID" align="center" prop="fatherId" v-if="false" />
-        <el-table-column label="父亲" align="center" min-width="160" show-overflow-tooltip>
-          <template #default="{ row }">
-            {{ row.fatherName }}<span v-if="row.fatherCode">（{{ row.fatherCode }}）</span>
-          </template>
-        </el-table-column>
         <el-table-column label="母亲ID" align="center" prop="motherId" v-if="false" />
-        <el-table-column label="母亲" align="center" min-width="160" show-overflow-tooltip>
-          <template #default="{ row }">
-            {{ row.motherName }}<span v-if="row.motherCode">（{{ row.motherCode }}）</span>
-          </template>
+        <el-table-column label="父母" align="center" min-width="160" show-overflow-tooltip>
+          <template #default="{ row }"> {{ row.fatherName }}<span v-if="row.fatherName">-</span>{{ row.motherName }} </template>
         </el-table-column>
         <el-table-column label="配偶ID" align="center" prop="spouseId" v-if="false" />
-        <el-table-column label="配偶" align="center" min-width="160" show-overflow-tooltip>
-          <template #default="{ row }">
-            {{ row.spouseName }}<span v-if="row.spouseCode">（{{ row.spouseCode }}）</span>
-          </template>
-        </el-table-column>
+        <el-table-column label="配偶" prop="spouseName" align="center" min-width="100" show-overflow-tooltip />
         <el-table-column label="手机号" align="center" prop="phoneNumber" show-overflow-tooltip min-width="170" />
         <el-table-column label="邮箱地址" align="center" prop="email" show-overflow-tooltip min-width="160" />
-        <el-table-column label="短信通知" align="center" prop="smsNotifyFlag" min-width="80">
-          <template #default="scope">
-            <dict-tag :options="whether_flag" :value="scope.row.smsNotifyFlag" />
-          </template>
-        </el-table-column>
+        <!--        <el-table-column label="短信通知" align="center" prop="smsNotifyFlag" min-width="80">-->
+        <!--          <template #default="scope">-->
+        <!--            <dict-tag :options="whether_flag" :value="scope.row.smsNotifyFlag" />-->
+        <!--          </template>-->
+        <!--        </el-table-column>-->
         <el-table-column label="邮箱通知" align="center" prop="emailNotifyFlag" min-width="80">
           <template #default="scope">
             <dict-tag :options="whether_flag" :value="scope.row.emailNotifyFlag" />
           </template>
         </el-table-column>
         <el-table-column label="身份证号" align="center" prop="idCard" show-overflow-tooltip min-width="170" />
-        <el-table-column label="生日" align="center" prop="birthday" min-width="170">
-          <template #default="scope">
-            <span>{{ parseTime(scope.row.birthday, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
-          </template>
-        </el-table-column>
         <el-table-column label="农历生日" align="center" prop="lunarBirthday" min-width="170">
           <template #default="scope">
             <span>{{ parseTime(scope.row.lunarBirthday, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="生日" align="center" prop="birthday" min-width="170">
+          <template #default="scope">
+            <span>{{ parseTime(scope.row.birthday, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
           </template>
         </el-table-column>
 
@@ -202,21 +191,48 @@
           </div>
 
           <div class="form-row">
-            <el-form-item style="margin-bottom: 2px" label="短信通知" prop="smsNotifyFlag">
-              <el-select :disabled="isDetailView" v-model="form.smsNotifyFlag" placeholder="请选择通知状态" class="select-with-icon">
+            <!--            <el-form-item style="margin-bottom: 2px" label="短信通知" prop="smsNotifyFlag">-->
+            <!--              <el-select :disabled="isDetailView" v-model="form.smsNotifyFlag" placeholder="请选择通知状态" class="select-with-icon">-->
+            <!--                <template #prefix>-->
+            <!--                  <i class="iconfont icon-shifoutongzhi"></i>-->
+            <!--                </template>-->
+            <!--                <el-option v-for="dict in whether_flag" :key="dict.value" :label="dict.label" :value="dict.value" />-->
+            <!--              </el-select>-->
+            <!--            </el-form-item>-->
+
+            <el-form-item label="邮箱通知" prop="emailNotifyFlag">
+              <el-select :disabled="isDetailView" v-model="form.emailNotifyFlag" placeholder="请选择通知状态" class="select-with-icon">
                 <template #prefix>
                   <i class="iconfont icon-shifoutongzhi"></i>
                 </template>
                 <el-option v-for="dict in whether_flag" :key="dict.value" :label="dict.label" :value="dict.value" />
               </el-select>
             </el-form-item>
-
-            <el-form-item style="margin-bottom: 2px" label="邮箱通知" prop="emailNotifyFlag">
-              <el-select :disabled="isDetailView" v-model="form.emailNotifyFlag" placeholder="请选择通知状态" class="select-with-icon">
+            <el-form-item label="父亲" prop="fatherId">
+              <el-select class="form-input" v-model="form.fatherId" placeholder="请选择父亲" clearable filterable :disabled="isDetailView">
                 <template #prefix>
-                  <i class="iconfont icon-shifoutongzhi"></i>
+                  <i class="iconfont icon-xingming"></i>
                 </template>
-                <el-option v-for="dict in whether_flag" :key="dict.value" :label="dict.label" :value="dict.value" />
+                <el-option v-for="user in userOptions" :key="user.id" :label="`${user.userName}（${user.userCode}）`" :value="user.id" />
+              </el-select>
+            </el-form-item>
+          </div>
+
+          <div class="form-row">
+            <el-form-item style="margin-bottom: 2px" label="母亲" prop="motherId">
+              <el-select class="form-input" v-model="form.motherId" placeholder="请选择母亲" clearable filterable :disabled="isDetailView">
+                <template #prefix>
+                  <i class="iconfont icon-xingming"></i>
+                </template>
+                <el-option v-for="user in userOptions" :key="user.id" :label="`${user.userName}（${user.userCode}）`" :value="user.id" />
+              </el-select>
+            </el-form-item>
+            <el-form-item style="margin-bottom: 2px" label="配偶" prop="spouseId">
+              <el-select class="form-input" v-model="form.spouseId" placeholder="请选择配偶" clearable filterable :disabled="isDetailView">
+                <template #prefix>
+                  <i class="iconfont icon-xingming"></i>
+                </template>
+                <el-option v-for="user in userOptions" :key="user.id" :label="`${user.userName}（${user.userCode}）`" :value="user.id" />
               </el-select>
             </el-form-item>
           </div>
@@ -238,6 +254,8 @@ import { listMsgUser, getMsgUser, delMsgUser, addMsgUser, updateMsgUser, convert
 import { MsgUserVO, MsgUserQuery, MsgUserForm } from '@/api/msg/msgUser/types';
 import { ref, reactive, toRefs, getCurrentInstance, onMounted, nextTick } from 'vue'; // 确保导入nextTick
 import { ElInput } from 'element-plus';
+import { userCodeList } from '@/api/msg/common';
+import { UserVo } from '@/api/msg/common/types';
 
 const { proxy } = getCurrentInstance() as ComponentInternalInstance;
 const { sys_user_sex, whether_flag } = toRefs<any>(proxy?.useDict('sys_user_sex', 'whether_flag'));
@@ -250,6 +268,20 @@ const ids = ref<Array<string | number>>([]);
 const single = ref(true);
 const multiple = ref(true);
 const total = ref(0);
+
+// 定义分组列表数据
+const userOptions = ref<UserVo[]>([]);
+
+// 获取分组列表
+const fetchUserOptions = async () => {
+  const user = await userCodeList();
+  userOptions.value = user.data || [];
+};
+
+// 页面加载时获取分组数据
+onMounted(() => {
+  fetchUserOptions();
+});
 
 const queryFormRef = ref<ElFormInstance>();
 const msgUserFormRef = ref<ElFormInstance>();
