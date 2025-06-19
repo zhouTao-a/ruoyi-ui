@@ -125,21 +125,6 @@ export interface MsgDayMatterForm extends BaseEntity {
    * 用户代码
    */
   userCode: string;
-
-  /**
-   * 分组信息
-   */
-  groupId?: string | number;
-
-  /**
-   * 分组名称
-   */
-  groupName: string;
-
-  /**
-   * 分组代码
-   */
-  groupCode: string;
 }
 
 export interface MsgDayMatterQuery extends PageQuery {

@@ -52,28 +52,28 @@
       <el-table v-loading="loading" :data="msgDayMatterList" @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" align="center" />
         <el-table-column label="主键ID" align="center" prop="id" v-if="false" />
-        <el-table-column label="事件名称" align="center" prop="dayName" />
+        <el-table-column label="事件名称" align="center" prop="dayName" min-width="100" />
         <el-table-column label="事件时间" align="center" prop="dayTarget" width="180">
           <template #default="scope">
             <span>{{ parseTime(scope.row.dayTarget, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="事件类型" align="center" prop="dayType">
+        <el-table-column label="事件类型" align="center" prop="dayType" min-width="80">
           <template #default="scope">
             <dict-tag :options="day_type" :value="scope.row.dayType" />
           </template>
         </el-table-column>
-        <el-table-column label="提醒周期" align="center" prop="remindType">
+        <el-table-column label="提醒周期" align="center" prop="remindType" min-width="80">
           <template #default="scope">
             <dict-tag :options="remind_type" :value="scope.row.remindType" />
           </template>
         </el-table-column>
-        <el-table-column label="重复提醒" align="center" prop="repeatFlag">
+        <el-table-column label="重复提醒" align="center" prop="repeatFlag" min-width="80">
           <template #default="scope">
             <dict-tag :options="whether_flag" :value="scope.row.repeatFlag" />
           </template>
         </el-table-column>
-        <el-table-column label="通知状态" align="center" prop="notifyStatus">
+        <el-table-column label="通知状态" align="center" prop="notifyStatus" min-width="80">
           <template #default="scope">
             <dict-tag :options="notify_status" :value="scope.row.notifyStatus" />
           </template>
@@ -91,6 +91,13 @@
             <el-tooltip content="修改" placement="top">
               <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['msg:msgDayMatter:edit']"></el-button>
             </el-tooltip>
+            <el-tooltip content="详情" placement="top">
+              <el-button link type="primary" @click="handleDetail(scope.row)" v-hasPermi="['msg:msgUser:detail']">
+                <template #default>
+                  <img src="@/assets/mes/Frame2.png" />
+                </template>
+              </el-button>
+            </el-tooltip>
             <el-tooltip content="删除" placement="top">
               <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['msg:msgDayMatter:remove']"></el-button>
             </el-tooltip>
@@ -101,27 +108,46 @@
       <pagination v-show="total > 0" :total="total" v-model:page="queryParams.pageNum" v-model:limit="queryParams.pageSize" @pagination="getList" />
     </el-card>
     <!-- 添加或修改事件对话框 -->
-    <el-dialog :title="dialog.title" v-model="dialog.visible" width="500px" append-to-body>
-      <el-form ref="msgDayMatterFormRef" :model="form" :rules="rules" label-width="80px">
+    <el-dialog @opened="handleDialogOpened" :title="dialog.title" v-model="dialog.visible" width="500px" append-to-body>
+      <el-form class="card-container" ref="msgDayMatterFormRef" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="事件名称" prop="dayName">
-          <el-input v-model="form.dayName" placeholder="请输入事件名称" />
+          <el-input :disabled="isDetailView" ref="dayNameInputRef" class="form-input" v-model="form.dayName" placeholder="请输入事件名称">
+            <template #prefix>
+              <i class="iconfont icon-shijianming"></i>
+            </template>
+          </el-input>
         </el-form-item>
         <el-form-item label="事件时间" prop="dayTarget">
-          <el-date-picker clearable v-model="form.dayTarget" type="datetime" value-format="YYYY-MM-DD HH:mm:ss" placeholder="请选择事件时间">
+          <el-date-picker
+            :disabled="isDetailView"
+            class="form-input"
+            style="width: 100%"
+            clearable
+            v-model="form.dayTarget"
+            type="datetime"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            placeholder="请选择事件时间"
+          >
           </el-date-picker>
         </el-form-item>
         <el-form-item label="事件类型" prop="dayType">
-          <el-select v-model="form.dayType" placeholder="请选择事件类型">
+          <el-select :disabled="isDetailView" class="form-input" v-model="form.dayType" placeholder="请选择事件类型">
             <el-option v-for="dict in day_type" :key="dict.value" :label="dict.label" :value="dict.value"></el-option>
+            <template #prefix>
+              <i class="iconfont icon-leixing"></i>
+            </template>
           </el-select>
         </el-form-item>
         <el-form-item label="提醒周期" prop="remindType">
-          <el-select v-model="form.remindType" placeholder="请选择提醒周期">
+          <el-select :disabled="isDetailView" class="form-input" v-model="form.remindType" placeholder="请选择提醒周期">
             <el-option v-for="dict in remind_type" :key="dict.value" :label="dict.label" :value="dict.value"></el-option>
+            <template #prefix>
+              <i class="iconfont icon-shijianzhouqi"></i>
+            </template>
           </el-select>
         </el-form-item>
         <el-form-item label="重复提醒" prop="repeatFlag">
-          <el-select v-model="form.repeatFlag" placeholder="请选择重复提醒" class="select-with-icon">
+          <el-select :disabled="isDetailView" v-model="form.repeatFlag" placeholder="请选择重复提醒" class="select-with-icon">
             <template #prefix>
               <i class="iconfont icon-shifoutongzhi"></i>
             </template>
@@ -129,13 +155,16 @@
           </el-select>
         </el-form-item>
         <el-form-item label="通知状态" prop="notifyStatus">
-          <el-radio-group v-model="form.notifyStatus">
+          <el-radio-group :disabled="isDetailView" class="form-input" v-model="form.notifyStatus">
             <el-radio v-for="dict in notify_status" :key="dict.value" :value="dict.value">{{ dict.label }}</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="用户" prop="userId">
-          <el-select v-model="form.userId" placeholder="请选择用户" clearable filterable>
+        <el-form-item style="margin-bottom: 2px" label="用户" prop="userId">
+          <el-select :disabled="isDetailView" class="form-input" v-model="form.userId" placeholder="请选择用户" clearable filterable>
             <el-option v-for="user in userOptions" :key="user.id" :label="`${user.userName}（${user.userCode}）`" :value="user.id" />
+            <template #prefix>
+              <i class="iconfont icon-xingming"></i>
+            </template>
           </el-select>
         </el-form-item>
       </el-form>
@@ -152,7 +181,8 @@
 <script setup name="MsgDayMatter" lang="ts">
 import { listMsgDayMatter, getMsgDayMatter, delMsgDayMatter, addMsgDayMatter, updateMsgDayMatter } from '@/api/msg/msgDayMatter';
 import { MsgDayMatterVO, MsgDayMatterQuery, MsgDayMatterForm } from '@/api/msg/msgDayMatter/types';
-import { onMounted, ref } from 'vue';
+import { ref, reactive, toRefs, getCurrentInstance, onMounted, nextTick } from 'vue';
+import { ElInput } from 'element-plus';
 import { userCodeList, groupCodeList } from '@/api/msg/common';
 import { GroupVo, UserVo } from '@/api/msg/common/types';
 
@@ -160,6 +190,20 @@ const { proxy } = getCurrentInstance() as ComponentInternalInstance;
 const { remind_type, day_type, notify_status, whether_flag } = toRefs<any>(
   proxy?.useDict('remind_type', 'day_type', 'notify_status', 'whether_flag')
 );
+
+const dayNameInputRef = ref<InstanceType<typeof ElInput> | null>(null);
+
+const handleDialogOpened = () => {
+  nextTick(() => {
+    if (dayNameInputRef.value) {
+      // 获取输入框的DOM元素并聚焦
+      const inputEl = dayNameInputRef.value.input;
+      if (inputEl) {
+        inputEl.focus();
+      }
+    }
+  });
+};
 
 const msgDayMatterList = ref<MsgDayMatterVO[]>([]);
 const buttonLoading = ref(false);
@@ -170,7 +214,7 @@ const single = ref(true);
 const multiple = ref(true);
 const total = ref(0);
 const dateRangeDayTarget = ref<[DateModelType, DateModelType]>(['', '']);
-
+const isDetailView = ref(false);
 const queryFormRef = ref<ElFormInstance>();
 const msgDayMatterFormRef = ref<ElFormInstance>();
 
@@ -188,9 +232,6 @@ const initFormData: MsgDayMatterForm = {
   repeatFlag: undefined,
   notifyStatus: undefined,
   userId: undefined,
-  groupId: undefined,
-  groupName: undefined,
-  groupCode: undefined,
   userName: undefined,
   userCode: undefined
 };
@@ -280,6 +321,7 @@ const handleSelectionChange = (selection: MsgDayMatterVO[]) => {
 /** 新增按钮操作 */
 const handleAdd = () => {
   reset();
+  isDetailView.value = false;
   //新增按钮设置初始值
   form.value.repeatFlag = 'T';
   form.value.notifyStatus = 'pending';
@@ -290,6 +332,18 @@ const handleAdd = () => {
 /** 修改按钮操作 */
 const handleUpdate = async (row?: MsgDayMatterVO) => {
   reset();
+  isDetailView.value = false;
+  const _id = row?.id || ids.value[0];
+  const res = await getMsgDayMatter(_id);
+  Object.assign(form.value, res.data);
+  dialog.visible = true;
+  dialog.title = '修改事件';
+};
+
+/** 详情操作 */
+const handleDetail = async (row?: MsgDayMatterVO) => {
+  reset();
+  isDetailView.value = true;
   const _id = row?.id || ids.value[0];
   const res = await getMsgDayMatter(_id);
   Object.assign(form.value, res.data);
@@ -338,3 +392,6 @@ onMounted(() => {
   getList();
 });
 </script>
+
+/* 使用common.scss中全部样式 */
+<style lang="scss" src="@/assets/styles/vue-column.scss" />

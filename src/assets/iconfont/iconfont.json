@@ -6,6 +6,27 @@
   "description": "ruoyi-ui",
   "glyphs": [
     {
+      "icon_id": "12640715",
+      "name": "事件名",
+      "font_class": "shijianming",
+      "unicode": "e66b",
+      "unicode_decimal": 58987
+    },
+    {
+      "icon_id": "18267951",
+      "name": "时间周期",
+      "font_class": "shijianzhouqi",
+      "unicode": "e996",
+      "unicode_decimal": 59798
+    },
+    {
+      "icon_id": "19449192",
+      "name": "类型",
+      "font_class": "leixing",
+      "unicode": "e635",
+      "unicode_decimal": 58933
+    },
+    {
       "icon_id": "1278150",
       "name": "辈分",
       "font_class": "beifen",

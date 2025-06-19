@@ -100,7 +100,7 @@
       <pagination v-show="total > 0" :total="total" v-model:page="queryParams.pageNum" v-model:limit="queryParams.pageSize" @pagination="getList" />
     </el-card>
     <!-- 添加或修改用户组对话框 -->
-    <el-dialog :title="dialog.title" v-model="dialog.visible" width="400px" append-to-body>
+    <el-dialog :title="dialog.title" v-model="dialog.visible" width="500px" append-to-body>
       <el-form class="card-container" ref="msgUserGroupFormRef" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="用户" prop="userIdList">
           <el-select class="form-input" v-model="form.userIdList" placeholder="请选择用户" clearable filterable multiple :disabled="isDetailView">

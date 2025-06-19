@@ -70,7 +70,7 @@
       <pagination v-show="total > 0" :total="total" v-model:page="queryParams.pageNum" v-model:limit="queryParams.pageSize" @pagination="getList" />
     </el-card>
     <!-- 添加或修改分组信息对话框 -->
-    <el-dialog @opened="handleDialogOpened" :title="dialog.title" v-model="dialog.visible" width="400px" append-to-body>
+    <el-dialog @opened="handleDialogOpened" :title="dialog.title" v-model="dialog.visible" width="500px" append-to-body>
       <el-form class="card-container" ref="msgGroupFormRef" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="分组名称" prop="groupName">
           <el-input class="form-input" :disabled="isDetailView" ref="groupNameInputRef" v-model="form.groupName" placeholder="请输入分组名称">
