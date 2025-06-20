@@ -6,6 +6,13 @@
   "description": "ruoyi-ui",
   "glyphs": [
     {
+      "icon_id": "17884760",
+      "name": "农历",
+      "font_class": "nongli",
+      "unicode": "e602",
+      "unicode_decimal": 58882
+    },
+    {
       "icon_id": "12640715",
       "name": "事件名",
       "font_class": "shijianming",

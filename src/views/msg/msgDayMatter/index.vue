@@ -58,6 +58,11 @@
             <span>{{ parseTime(scope.row.dayTarget, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
           </template>
         </el-table-column>
+        <el-table-column label="时间类型" align="center" prop="dayLunar" min-width="80">
+          <template #default="scope">
+            <dict-tag :options="day_lunar" :value="scope.row.dayLunar" />
+          </template>
+        </el-table-column>
         <el-table-column label="事件类型" align="center" prop="dayType" min-width="80">
           <template #default="scope">
             <dict-tag :options="day_type" :value="scope.row.dayType" />
@@ -138,9 +143,17 @@
             </template>
           </el-select>
         </el-form-item>
+        <el-form-item label="时间类型" prop="dayLunar">
+          <el-select :disabled="isDetailView" class="form-input" v-model="form.dayLunar" placeholder="请选择时间类型">
+            <el-option v-for="dict in day_lunar" :key="dict.value" :label="dict.label" :value="dict.value"></el-option>
+            <template #prefix>
+              <i class="iconfont icon-nongli"></i>
+            </template>
+          </el-select>
+        </el-form-item>
         <el-form-item label="提醒周期" prop="remindType">
           <el-select :disabled="isDetailView" class="form-input" v-model="form.remindType" placeholder="请选择提醒周期">
-            <el-option v-for="dict in remind_type" :key="dict.value" :label="dict.label" :value="dict.value"></el-option>
+            <el-option v-for="dict in filteredRemindType" :key="dict.value" :label="dict.label" :value="dict.value"></el-option>
             <template #prefix>
               <i class="iconfont icon-shijianzhouqi"></i>
             </template>
@@ -185,10 +198,11 @@ import { ref, reactive, toRefs, getCurrentInstance, onMounted, nextTick } from '
 import { ElInput } from 'element-plus';
 import { userCodeList, groupCodeList } from '@/api/msg/common';
 import { GroupVo, UserVo } from '@/api/msg/common/types';
+import { watch, computed } from 'vue';
 
 const { proxy } = getCurrentInstance() as ComponentInternalInstance;
-const { remind_type, day_type, notify_status, whether_flag } = toRefs<any>(
-  proxy?.useDict('remind_type', 'day_type', 'notify_status', 'whether_flag')
+const { remind_type, day_type, notify_status, whether_flag, day_lunar } = toRefs<any>(
+  proxy?.useDict('remind_type', 'day_type', 'notify_status', 'whether_flag', 'day_lunar')
 );
 
 const dayNameInputRef = ref<InstanceType<typeof ElInput> | null>(null);
@@ -227,6 +241,7 @@ const initFormData: MsgDayMatterForm = {
   id: undefined,
   dayName: undefined,
   dayTarget: undefined,
+  dayLunar: undefined,
   dayType: undefined,
   remindType: undefined,
   repeatFlag: undefined,
@@ -249,6 +264,7 @@ const data = reactive<PageData<MsgDayMatterForm, MsgDayMatterQuery>>({
     id: [{ required: true, message: '主键ID不能为空', trigger: 'blur' }],
     dayName: [{ required: true, message: '事件名称不能为空', trigger: 'blur' }],
     dayTarget: [{ required: true, message: '事件时间不能为空', trigger: 'blur' }],
+    dayLunar: [{ required: true, message: '时间类型不能为空', trigger: 'change' }],
     dayType: [{ required: true, message: '事件类型不能为空', trigger: 'change' }],
     remindType: [{ required: true, message: '提醒周期不能为空', trigger: 'change' }],
     repeatFlag: [{ required: true, message: '重复提醒不能为空', trigger: 'blur' }],
@@ -257,6 +273,32 @@ const data = reactive<PageData<MsgDayMatterForm, MsgDayMatterQuery>>({
 });
 
 const { queryParams, form, rules } = toRefs(data);
+
+// 根据 dayLunar 过滤提醒周期
+const filteredRemindType = computed(() => {
+  return form.value.dayLunar === 'lunar' ? remind_type.value.filter((r) => r.value === 'yearly') : remind_type.value;
+});
+
+// 监听 dayType 自动设置
+watch(
+  () => form.value.dayType,
+  (val) => {
+    if (val === 'birthday') {
+      form.value.dayLunar = 'lunar';
+      form.value.remindType = 'yearly';
+    }
+  }
+);
+
+// 监听 dayLunar 自动修正 remindType
+watch(
+  () => form.value.dayLunar,
+  (val) => {
+    if (val === 'lunar' && form.value.remindType !== 'yearly') {
+      form.value.remindType = 'yearly';
+    }
+  }
+);
 
 // 定义分组列表数据
 const groupOptions = ref<GroupVo[]>([]);
@@ -325,6 +367,7 @@ const handleAdd = () => {
   //新增按钮设置初始值
   form.value.repeatFlag = 'T';
   form.value.notifyStatus = 'pending';
+  form.value.dayLunar = 'solar';
   dialog.visible = true;
   dialog.title = '添加事件';
 };

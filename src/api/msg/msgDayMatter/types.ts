@@ -15,6 +15,11 @@ export interface MsgDayMatterVO {
   dayTarget: string;
 
   /**
+   * 时间类型（solar, lunar）
+   */
+  dayLunar: string;
+
+  /**
    * 事件类型（life, work, anniversary, birthday）
    */
   dayType: string;
@@ -85,6 +90,11 @@ export interface MsgDayMatterForm extends BaseEntity {
    * 事件时间（含时分）
    */
   dayTarget?: string;
+
+  /**
+   * 时间类型（solar, lunar）
+   */
+  dayLunar?: string;
 
   /**
    * 事件类型（life, work, anniversary, birthday）
