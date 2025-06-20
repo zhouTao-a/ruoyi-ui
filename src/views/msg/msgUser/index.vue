@@ -460,7 +460,7 @@ const submitForm = () => {
 /** 删除按钮操作 */
 const handleDelete = async (row?: MsgUserVO) => {
   const _ids = row?.id || ids.value;
-  await proxy?.$modal.confirm('是否确认删除用户编号为"' + _ids + '"的数据项？').finally(() => (loading.value = false));
+  await proxy?.$modal.confirm('是否确认删除用户"' + (row?.userName || '选中') + '"的数据项？').finally(() => (loading.value = false));
   await delMsgUser(_ids);
   proxy?.$modal.msgSuccess('删除成功');
   await getList();

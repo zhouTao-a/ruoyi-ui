@@ -21,3 +21,14 @@ export function groupCodeList(params?: { groupName?: string; id?: string | numbe
     params: params
   });
 }
+
+/**
+ * 获取用户列表
+ */
+export function dayNameList(params?: { dayName?: string; id?: string | number }) {
+  return request({
+    url: '/msg/msgDayMatter/dayNameList',
+    method: 'get',
+    params: params
+  });
+}

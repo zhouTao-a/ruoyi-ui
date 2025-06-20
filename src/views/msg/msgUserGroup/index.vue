@@ -78,7 +78,7 @@
             <dict-tag :options="kinship_level" :value="scope.row.kinshipLevel" />
           </template>
         </el-table-column>
-        <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+        <el-table-column label="操作" align="center" class-name="small-padding fixed-width" min-width="120" fixed="right">
           <template #default="scope">
             <el-tooltip content="修改" placement="top">
               <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['msg:msgUserGroup:edit']"></el-button>
@@ -103,7 +103,15 @@
     <el-dialog :title="dialog.title" v-model="dialog.visible" width="500px" append-to-body>
       <el-form class="card-container" ref="msgUserGroupFormRef" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="用户" prop="userIdList">
-          <el-select class="form-input" v-model="form.userIdList" placeholder="请选择用户" clearable filterable multiple :disabled="isDetailView">
+          <el-select
+            class="form-input"
+            v-model="form.userIdList"
+            placeholder="请选择用户"
+            clearable
+            filterable
+            :multiple="isMultiple"
+            :disabled="isDetailView"
+          >
             <template #prefix>
               <i class="iconfont icon-xingming"></i>
             </template>
@@ -171,6 +179,8 @@ const ids = ref<Array<string | number>>([]);
 const single = ref(true);
 const multiple = ref(true);
 const total = ref(0);
+const isMultiple = ref(false); // 默认单选
+const isDetailView = ref(false); // 是否为详情查看模式
 
 const queryFormRef = ref<ElFormInstance>();
 const msgUserGroupFormRef = ref<ElFormInstance>();
@@ -271,6 +281,7 @@ const handleSelectionChange = (selection: MsgUserGroupVO[]) => {
 /** 新增按钮操作 */
 const handleAdd = () => {
   reset();
+  isMultiple.value = true;
   isDetailView.value = false;
   dialog.visible = true;
   dialog.title = '添加用户组';
@@ -279,6 +290,7 @@ const handleAdd = () => {
 /** 修改按钮操作 */
 const handleUpdate = async (row?: MsgUserGroupVO) => {
   reset();
+  isMultiple.value = false;
   isDetailView.value = false;
   const _id = row?.id || ids.value[0];
   const res = await getMsgUserGroup(_id);
@@ -288,10 +300,10 @@ const handleUpdate = async (row?: MsgUserGroupVO) => {
   dialog.title = '修改用户组';
 };
 
-const isDetailView = ref(false); // 是否为详情查看模式
 /** 查看详情 */
 const handleDetail = async (row?: MsgUserGroupVO) => {
   reset();
+  isMultiple.value = false;
   isDetailView.value = true;
   const _id = row?.id || ids.value[0];
   const res = await getMsgUserGroup(_id);
@@ -321,7 +333,7 @@ const submitForm = () => {
 /** 删除按钮操作 */
 const handleDelete = async (row?: MsgUserGroupVO) => {
   const _ids = row?.id || ids.value;
-  await proxy?.$modal.confirm('是否确认删除用户组编号为"' + _ids + '"的数据项？').finally(() => (loading.value = false));
+  await proxy?.$modal.confirm('是否确认删除用户组"' + (row?.userName || '选中') + '"的数据项？').finally(() => (loading.value = false));
   await delMsgUserGroup(_ids);
   proxy?.$modal.msgSuccess('删除成功');
   await getList();

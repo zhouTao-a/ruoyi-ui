@@ -91,7 +91,7 @@
         <el-table-column label="用户" align="center" prop="userId" v-if="false" />
         <el-table-column label="用户名称" align="center" prop="userName" min-width="100" />
         <el-table-column label="用户代码" align="center" prop="userCode" min-width="100" />
-        <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+        <el-table-column label="操作" align="center" class-name="small-padding fixed-width" min-width="120" fixed="right">
           <template #default="scope">
             <el-tooltip content="修改" placement="top">
               <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['msg:msgDayMatter:edit']"></el-button>
@@ -414,7 +414,7 @@ const submitForm = () => {
 /** 删除按钮操作 */
 const handleDelete = async (row?: MsgDayMatterVO) => {
   const _ids = row?.id || ids.value;
-  await proxy?.$modal.confirm('是否确认删除事件编号为"' + _ids + '"的数据项？').finally(() => (loading.value = false));
+  await proxy?.$modal.confirm('是否确认删除事件"' + (row?.dayName || '选中') + '"的数据项？').finally(() => (loading.value = false));
   await delMsgDayMatter(_ids);
   proxy?.$modal.msgSuccess('删除成功');
   await getList();

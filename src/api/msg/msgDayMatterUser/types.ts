@@ -13,6 +13,21 @@ export interface MsgDayMatterUserVO {
    * 用户ID
    */
   userId: string | number;
+
+  /**
+   * 用户名
+   */
+  userName?: string;
+
+  /**
+   * 用户编码
+   */
+  userCode?: string;
+
+  /**
+   * 事件名
+   */
+  dayName?: string;
 }
 
 export interface MsgDayMatterUserForm extends BaseEntity {
@@ -30,6 +45,11 @@ export interface MsgDayMatterUserForm extends BaseEntity {
    * 用户ID
    */
   userId?: string | number;
+
+  /**
+   * 用户List
+   */
+  userIdList?: (string | number)[];
 }
 
 export interface MsgDayMatterUserQuery extends PageQuery {

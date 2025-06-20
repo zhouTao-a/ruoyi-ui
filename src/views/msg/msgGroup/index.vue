@@ -48,7 +48,7 @@
         <el-table-column label="默认参考用户ID" align="center" prop="defaultTargetUserId" v-if="false" />
         <el-table-column label="参考用户名称" align="center" prop="defaultTargetUserName" min-width="100" v-if="false" />
         <el-table-column label="参考用户代码" align="center" prop="defaultTargetUserCode" min-width="100" v-if="false" />
-        <el-table-column label="操作" align="center" class-name="small-padding fixed-width" min-width="100">
+        <el-table-column label="操作" align="center" class-name="small-padding fixed-width" min-width="120" fixed="right">
           <template #default="scope">
             <el-tooltip content="修改" placement="top">
               <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['msg:msgGroup:edit']"></el-button>
@@ -332,7 +332,7 @@ const submitForm = () => {
 /** 删除按钮操作 */
 const handleDelete = async (row?: MsgGroupVO) => {
   const _ids = row?.id || ids.value;
-  await proxy?.$modal.confirm('是否确认删除分组信息编号为"' + _ids + '"的数据项？').finally(() => (loading.value = false));
+  await proxy?.$modal.confirm('是否确认删除分组"' + (row?.groupName || '选中') + '"的数据项？').finally(() => (loading.value = false));
   await delMsgGroup(_ids);
   proxy?.$modal.msgSuccess('删除成功');
   await getList();

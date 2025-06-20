@@ -37,3 +37,18 @@ export interface UserVo {
    */
   userCode: string;
 }
+
+/**
+ * 事件信息
+ */
+export interface DayNameVo {
+  /**
+   * 事件ID
+   */
+  id: string | number;
+
+  /**
+   * 事件名称
+   */
+  dayName: string;
+}
