@@ -75,26 +75,6 @@ export interface MsgUserGroupForm extends BaseEntity {
    * 亲缘关系
    */
   kinshipLevel?: string;
-
-  /**
-   * 分组名称
-   */
-  groupName?: string;
-
-  /**
-   * 分组编码
-   */
-  groupCode?: string;
-
-  /**
-   * 用户名
-   */
-  userName?: string;
-
-  /**
-   * 用户编码
-   */
-  userCode?: string;
 }
 
 export interface MsgUserGroupQuery extends PageQuery {

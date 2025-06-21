@@ -199,7 +199,8 @@ const queryParams = ref<MsgDayMatterUserQuery>({
 const initFormData: MsgDayMatterUserForm = {
   id: undefined,
   dayMatterId: undefined,
-  userId: undefined
+  userId: undefined,
+  userIdList: []
 };
 
 // 新增表单数据和引用
@@ -216,7 +217,7 @@ const addRules = ref({
 });
 
 const editRules = ref({
-  id: [{ required: true, message: '主键ID不能为空', trigger: 'blur' }],
+  id: [{ required: true, message: '主键不能为空', trigger: 'blur' }],
   dayMatterId: [{ required: true, message: '事件不能为空', trigger: 'blur' }],
   userId: [{ required: true, message: '用户不能为空', trigger: 'blur' }]
 });

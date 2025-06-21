@@ -218,7 +218,7 @@ const data = reactive<PageData<MsgGroupForm, MsgGroupQuery>>({
     params: {}
   },
   rules: {
-    id: [{ required: true, message: '主键ID不能为空', trigger: 'blur' }],
+    id: [{ required: true, message: '主键不能为空', trigger: 'blur' }],
     groupName: [{ required: true, message: '分组名称不能为空', trigger: 'blur' }],
     groupCode: [{ required: true, message: '分组编码不能为空', trigger: 'blur' }]
   }
