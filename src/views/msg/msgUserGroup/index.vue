@@ -99,19 +99,11 @@
 
       <pagination v-show="total > 0" :total="total" v-model:page="queryParams.pageNum" v-model:limit="queryParams.pageSize" @pagination="getList" />
     </el-card>
-    <!-- 添加或修改用户组对话框 -->
-    <el-dialog :title="dialog.title" v-model="dialog.visible" width="500px" append-to-body>
-      <el-form class="card-container" ref="msgUserGroupFormRef" :model="form" :rules="rules" label-width="80px">
+    <!-- 添加用户组对话框 -->
+    <el-dialog :title="addDialog.title" v-model="addDialog.visible" width="500px" append-to-body>
+      <el-form class="card-container" ref="addFormRef" :model="addForm" :rules="addRules" label-width="80px">
         <el-form-item label="用户" prop="userIdList">
-          <el-select
-            class="form-input"
-            v-model="form.userIdList"
-            placeholder="请选择用户"
-            clearable
-            filterable
-            :multiple="isMultiple"
-            :disabled="isDetailView"
-          >
+          <el-select class="form-input" v-model="addForm.userIdList" placeholder="请选择用户" clearable filterable multiple :disabled="isDetailView">
             <template #prefix>
               <i class="iconfont icon-xingming"></i>
             </template>
@@ -119,7 +111,7 @@
           </el-select>
         </el-form-item>
         <el-form-item style="margin-bottom: 2px" label="分组" prop="groupId">
-          <el-select class="form-input" v-model="form.groupId" placeholder="请选择分组" clearable :disabled="isDetailView">
+          <el-select class="form-input" v-model="addForm.groupId" placeholder="请选择分组" clearable :disabled="isDetailView">
             <template #prefix>
               <i class="iconfont icon-renyuanfenzu"></i>
             </template>
@@ -153,8 +145,36 @@
       </el-form>
       <template #footer>
         <div class="dialog-footer">
-          <el-button class="primary-btn" :loading="buttonLoading" type="primary" @click="submitForm" v-if="!isDetailView">确 定</el-button>
-          <el-button class="cancel-btn" @click="cancel">取 消</el-button>
+          <el-button class="primary-btn" :loading="buttonLoading" type="primary" @click="submitAddForm" v-if="!isDetailView">确 定</el-button>
+          <el-button class="cancel-btn" @click="cancelAdd">取 消</el-button>
+        </div>
+      </template>
+    </el-dialog>
+
+    <!-- 修改用户组对话框 -->
+    <el-dialog :title="editDialog.title" v-model="editDialog.visible" width="500px" append-to-body>
+      <el-form class="card-container" ref="editFormRef" :model="editForm" :rules="editRules" label-width="80px">
+        <el-form-item label="用户" prop="userId">
+          <el-select class="form-input" v-model="editForm.userId" placeholder="请选择用户" clearable filterable :disabled="isDetailView">
+            <template #prefix>
+              <i class="iconfont icon-xingming"></i>
+            </template>
+            <el-option v-for="user in userOptions" :key="user.id" :label="`${user.userName}（${user.userCode}）`" :value="user.id" />
+          </el-select>
+        </el-form-item>
+        <el-form-item style="margin-bottom: 2px" label="分组" prop="groupId">
+          <el-select class="form-input" v-model="editForm.groupId" placeholder="请选择分组" clearable :disabled="isDetailView">
+            <template #prefix>
+              <i class="iconfont icon-renyuanfenzu"></i>
+            </template>
+            <el-option v-for="group in groupOptions" :key="group.id" :label="`${group.groupName}（${group.groupCode}）`" :value="group.id" />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button class="primary-btn" :loading="buttonLoading" type="primary" @click="submitEditForm" v-if="!isDetailView">确 定</el-button>
+          <el-button class="cancel-btn" @click="cancelEdit">取 消</el-button>
         </div>
       </template>
     </el-dialog>
@@ -179,11 +199,8 @@ const ids = ref<Array<string | number>>([]);
 const single = ref(true);
 const multiple = ref(true);
 const total = ref(0);
-const isMultiple = ref(false); // 默认单选
 const isDetailView = ref(false); // 是否为详情查看模式
-
 const queryFormRef = ref<ElFormInstance>();
-const msgUserGroupFormRef = ref<ElFormInstance>();
 
 // 定义分组列表数据
 const groupOptions = ref<GroupVo[]>([]);
@@ -200,11 +217,27 @@ const fetchGroupAndUserOptions = async () => {
 // 页面加载时获取分组数据
 onMounted(() => {
   fetchGroupAndUserOptions();
+  getList();
 });
 
-const dialog = reactive<DialogOption>({
+const addDialog = ref<DialogOption>({
   visible: false,
   title: ''
+});
+const editDialog = ref<DialogOption>({
+  visible: false,
+  title: ''
+});
+
+// 单独定义查询参数，使用明确的类型
+const queryParams = ref<MsgUserGroupQuery>({
+  pageNum: 1,
+  pageSize: 10,
+  userId: undefined,
+  groupId: undefined,
+  relativeGenerationDiff: undefined,
+  kinshipLevel: undefined,
+  params: {}
 });
 
 const initFormData: MsgUserGroupForm = {
@@ -215,28 +248,35 @@ const initFormData: MsgUserGroupForm = {
   relativeGenerationDiff: undefined,
   kinshipLevel: undefined
 };
-const data = reactive<PageData<MsgUserGroupForm, MsgUserGroupQuery>>({
-  form: { ...initFormData },
-  queryParams: {
-    pageNum: 1,
-    pageSize: 10,
-    userId: undefined,
-    groupId: undefined,
-    relativeGenerationDiff: undefined,
-    kinshipLevel: undefined,
-    params: {}
-  },
-  rules: {
-    id: [{ required: true, message: '主键ID不能为空', trigger: 'blur' }],
-    userId: [{ required: true, message: '用户ID不能为空', trigger: 'blur' }],
-    groupId: [{ required: true, message: '分组ID不能为空', trigger: 'blur' }]
-    // ,
-    // relativeGenerationDiff: [{ required: true, message: '辈分差不能为空', trigger: 'blur' }],
-    // kinshipLevel: [{ required: true, message: '亲缘关系不能为空', trigger: 'change' }]
-  }
+
+// 新增表单数据和引用
+const addFormRef = ref<ElFormInstance>();
+const addForm = ref<MsgUserGroupForm>({ ...initFormData });
+
+// 修改表单数据和引用
+const editFormRef = ref<ElFormInstance>();
+const editForm = ref<MsgUserGroupForm>({ ...initFormData });
+
+const addRules = ref({
+  userIdList: [{ required: true, message: '用户不能为空', trigger: 'blur' }],
+  groupId: [{ required: true, message: '分组不能为空', trigger: 'blur' }]
 });
 
-const { queryParams, form, rules } = toRefs(data);
+const editRules = ref({
+  id: [{ required: true, message: '主键不能为空', trigger: 'blur' }],
+  userId: [{ required: true, message: '用户不能为空', trigger: 'blur' }],
+  groupId: [{ required: true, message: '分组不能为空', trigger: 'blur' }]
+});
+
+/** 取消按钮操作 */
+const cancelAdd = () => resetForm(addFormRef, addForm, addDialog);
+const cancelEdit = () => resetForm(editFormRef, editForm, editDialog);
+
+function resetForm(refForm: any, formModel: any, dialog: any) {
+  refForm?.value?.resetFields();
+  Object.assign(formModel.value, initFormData);
+  dialog.value.visible = false;
+}
 
 /** 查询用户组列表 */
 const getList = async () => {
@@ -245,18 +285,6 @@ const getList = async () => {
   msgUserGroupList.value = res.rows;
   total.value = res.total;
   loading.value = false;
-};
-
-/** 取消按钮 */
-const cancel = () => {
-  reset();
-  dialog.visible = false;
-};
-
-/** 表单重置 */
-const reset = () => {
-  form.value = { ...initFormData };
-  msgUserGroupFormRef.value?.resetFields();
 };
 
 /** 搜索按钮操作 */
@@ -280,51 +308,56 @@ const handleSelectionChange = (selection: MsgUserGroupVO[]) => {
 
 /** 新增按钮操作 */
 const handleAdd = () => {
-  reset();
-  isMultiple.value = true;
+  cancelAdd(); // 确保重置表单状态
   isDetailView.value = false;
-  dialog.visible = true;
-  dialog.title = '添加用户组';
+  addDialog.value.visible = true;
+  addDialog.value.title = '添加用户组';
 };
 
 /** 修改按钮操作 */
 const handleUpdate = async (row?: MsgUserGroupVO) => {
-  reset();
-  isMultiple.value = false;
+  cancelEdit(); // 确保重置表单状态
   isDetailView.value = false;
   const _id = row?.id || ids.value[0];
   const res = await getMsgUserGroup(_id);
-  Object.assign(form.value, res.data);
-  form.value.userIdList = [res.data.userId];
-  dialog.visible = true;
-  dialog.title = '修改用户组';
+  Object.assign(editForm.value, res.data);
+  editDialog.value.title = '修改用户组';
+  editDialog.value.visible = true;
 };
 
 /** 查看详情 */
 const handleDetail = async (row?: MsgUserGroupVO) => {
-  reset();
-  isMultiple.value = false;
+  cancelEdit(); // 确保重置表单状态
   isDetailView.value = true;
   const _id = row?.id || ids.value[0];
   const res = await getMsgUserGroup(_id);
-  Object.assign(form.value, res.data);
-  form.value.userIdList = [res.data.userId];
-  dialog.visible = true;
-  dialog.title = '用户组详情';
+  Object.assign(editForm.value, res.data);
+  editDialog.value.visible = true;
+  editDialog.value.title = '用户组详情';
 };
 
 /** 提交按钮 */
-const submitForm = () => {
-  msgUserGroupFormRef.value?.validate(async (valid: boolean) => {
+const submitAddForm = () => {
+  addFormRef.value?.validate(async (valid: boolean) => {
     if (valid) {
       buttonLoading.value = true;
-      if (form.value.id) {
-        await updateMsgUserGroup(form.value).finally(() => (buttonLoading.value = false));
-      } else {
-        await addMsgUserGroup(form.value).finally(() => (buttonLoading.value = false));
-      }
+      await addMsgUserGroup(addForm.value).finally(() => (buttonLoading.value = false));
       proxy?.$modal.msgSuccess('操作成功');
-      dialog.visible = false;
+      addDialog.value.visible = false;
+      await getList();
+    }
+  });
+};
+
+/** 修改按钮 */
+const submitEditForm = () => {
+  editFormRef.value?.validate(async (valid: boolean) => {
+    if (valid) {
+      buttonLoading.value = true;
+      editForm.value.userIdList = [editForm.value.userId];
+      await updateMsgUserGroup(editForm.value).finally(() => (buttonLoading.value = false));
+      proxy?.$modal.msgSuccess('操作成功');
+      editDialog.value.visible = false;
       await getList();
     }
   });
@@ -349,10 +382,6 @@ const handleExport = () => {
     `msgUserGroup_${new Date().getTime()}.xlsx`
   );
 };
-
-onMounted(() => {
-  getList();
-});
 </script>
 
 /* 使用common.scss中全部样式 */

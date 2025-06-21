@@ -75,19 +75,11 @@
 
       <pagination v-show="total > 0" :total="total" v-model:page="queryParams.pageNum" v-model:limit="queryParams.pageSize" @pagination="getList" />
     </el-card>
-    <!-- 添加或修改事件与用户关联对话框 -->
-    <el-dialog :title="dialog.title" v-model="dialog.visible" width="500px" append-to-body>
-      <el-form class="card-container" ref="msgDayMatterUserFormRef" :model="form" :rules="rules" label-width="80px">
+    <!-- 添加用户事件对话框 -->
+    <el-dialog :title="addDialog.title" v-model="addDialog.visible" width="500px" append-to-body>
+      <el-form class="card-container" ref="addFormRef" :model="addForm" :rules="addRules" label-width="80px">
         <el-form-item label="用户" prop="userIdList">
-          <el-select
-            class="form-input"
-            v-model="form.userIdList"
-            placeholder="请选择用户"
-            clearable
-            filterable
-            :multiple="isMultiple"
-            :disabled="isDetailView"
-          >
+          <el-select class="form-input" v-model="addForm.userIdList" placeholder="请选择用户" clearable filterable multiple :disabled="isDetailView">
             <template #prefix>
               <i class="iconfont icon-xingming"></i>
             </template>
@@ -95,7 +87,7 @@
           </el-select>
         </el-form-item>
         <el-form-item style="margin-bottom: 2px" label="事件" prop="dayMatterId">
-          <el-select class="form-input" v-model="form.dayMatterId" placeholder="请选择事件" clearable :disabled="isDetailView">
+          <el-select class="form-input" v-model="addForm.dayMatterId" placeholder="请选择事件" clearable :disabled="isDetailView">
             <template #prefix>
               <i class="iconfont icon-shijianming"></i>
             </template>
@@ -105,8 +97,36 @@
       </el-form>
       <template #footer>
         <div class="dialog-footer">
-          <el-button v-if="!isDetailView" :loading="buttonLoading" type="primary" @click="submitForm">确 定</el-button>
-          <el-button @click="cancel">取 消</el-button>
+          <el-button v-if="!isDetailView" :loading="buttonLoading" type="primary" @click="submitAddForm">确 定</el-button>
+          <el-button @click="cancelAdd">取 消</el-button>
+        </div>
+      </template>
+    </el-dialog>
+
+    <!-- 修改用户事件对话框 -->
+    <el-dialog :title="editDialog.title" v-model="editDialog.visible" width="500px" append-to-body>
+      <el-form class="card-container" ref="editFormRef" :model="editForm" :rules="editRules" label-width="80px">
+        <el-form-item label="用户" prop="userId">
+          <el-select class="form-input" v-model="editForm.userId" placeholder="请选择用户" clearable filterable :disabled="isDetailView">
+            <template #prefix>
+              <i class="iconfont icon-xingming"></i>
+            </template>
+            <el-option v-for="user in userOptions" :key="user.id" :label="`${user.userName}（${user.userCode}）`" :value="user.id" />
+          </el-select>
+        </el-form-item>
+        <el-form-item style="margin-bottom: 2px" label="事件" prop="dayMatterId">
+          <el-select class="form-input" v-model="editForm.dayMatterId" placeholder="请选择事件" clearable :disabled="isDetailView">
+            <template #prefix>
+              <i class="iconfont icon-shijianming"></i>
+            </template>
+            <el-option v-for="dayName in dayNameOptions" :key="dayName.id" :label="dayName.dayName" :value="dayName.id" />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button v-if="!isDetailView" :loading="buttonLoading" type="primary" @click="submitEditForm">确 定</el-button>
+          <el-button @click="cancelEdit">取 消</el-button>
         </div>
       </template>
     </el-dialog>
@@ -138,9 +158,7 @@ const multiple = ref(true);
 const total = ref(0);
 
 const queryFormRef = ref<ElFormInstance>();
-const msgDayMatterUserFormRef = ref<ElFormInstance>();
 const isDetailView = ref(false); // 是否为详情查看模式
-const isMultiple = ref(false); // 默认单选
 
 // 定义分组列表数据
 const dayNameOptions = ref<DayNameVo[]>([]);
@@ -156,12 +174,26 @@ const fetchGroupAndUserOptions = async () => {
 
 // 页面加载时获取分组数据
 onMounted(() => {
+  getList();
   fetchGroupAndUserOptions();
 });
 
-const dialog = reactive<DialogOption>({
+const addDialog = ref<DialogOption>({
   visible: false,
   title: ''
+});
+const editDialog = ref<DialogOption>({
+  visible: false,
+  title: ''
+});
+
+// 单独定义查询参数，使用明确的类型
+const queryParams = ref<MsgDayMatterUserQuery>({
+  pageNum: 1,
+  pageSize: 10,
+  dayMatterId: undefined,
+  userId: undefined,
+  params: {}
 });
 
 const initFormData: MsgDayMatterUserForm = {
@@ -169,25 +201,27 @@ const initFormData: MsgDayMatterUserForm = {
   dayMatterId: undefined,
   userId: undefined
 };
-const data = reactive<PageData<MsgDayMatterUserForm, MsgDayMatterUserQuery>>({
-  form: { ...initFormData },
-  queryParams: {
-    pageNum: 1,
-    pageSize: 10,
-    dayMatterId: undefined,
-    userId: undefined,
-    params: {}
-  },
-  rules: {
-    id: [{ required: true, message: '主键ID不能为空', trigger: 'blur' }],
-    dayMatterId: [{ required: true, message: '事件不能为空', trigger: 'blur' }],
-    userIdList: [{ required: true, message: '用户不能为空', trigger: 'blur' }]
-  }
+
+// 新增表单数据和引用
+const addFormRef = ref<ElFormInstance>();
+const addForm = ref<MsgDayMatterUserForm>({ ...initFormData });
+
+// 修改表单数据和引用
+const editFormRef = ref<ElFormInstance>();
+const editForm = ref<MsgDayMatterUserForm>({ ...initFormData });
+
+const addRules = ref({
+  userIdList: [{ required: true, message: '用户不能为空', trigger: 'blur' }],
+  dayMatterId: [{ required: true, message: '事件不能为空', trigger: 'blur' }]
 });
 
-const { queryParams, form, rules } = toRefs(data);
+const editRules = ref({
+  id: [{ required: true, message: '主键ID不能为空', trigger: 'blur' }],
+  dayMatterId: [{ required: true, message: '事件不能为空', trigger: 'blur' }],
+  userId: [{ required: true, message: '用户不能为空', trigger: 'blur' }]
+});
 
-/** 查询事件与用户关联列表 */
+/** 查询用户事件列表 */
 const getList = async () => {
   loading.value = true;
   const res = await listMsgDayMatterUser(queryParams.value);
@@ -196,17 +230,15 @@ const getList = async () => {
   loading.value = false;
 };
 
-/** 取消按钮 */
-const cancel = () => {
-  reset();
-  dialog.visible = false;
-};
+/** 取消按钮操作 */
+const cancelAdd = () => resetForm(addFormRef, addForm, addDialog);
+const cancelEdit = () => resetForm(editFormRef, editForm, editDialog);
 
-/** 表单重置 */
-const reset = () => {
-  form.value = { ...initFormData };
-  msgDayMatterUserFormRef.value?.resetFields();
-};
+function resetForm(refForm: any, formModel: any, dialog: any) {
+  refForm?.value?.resetFields();
+  Object.assign(formModel.value, initFormData);
+  dialog.value.visible = false;
+}
 
 /** 搜索按钮操作 */
 const handleQuery = () => {
@@ -229,53 +261,56 @@ const handleSelectionChange = (selection: MsgDayMatterUserVO[]) => {
 
 /** 新增按钮操作 */
 const handleAdd = () => {
-  reset();
-  isMultiple.value = true;
+  cancelAdd(); // 确保重置表单状态
   isDetailView.value = false;
-  dialog.visible = true;
-  dialog.title = '添加事件与用户关联';
+  addDialog.value.visible = true;
+  addDialog.value.title = '添加用户事件';
 };
 
 /** 修改按钮操作 */
 const handleUpdate = async (row?: MsgDayMatterUserVO) => {
-  reset();
-  isMultiple.value = false;
+  cancelEdit(); // 确保重置表单状态
   isDetailView.value = false;
   const _id = row?.id || ids.value[0];
   const res = await getMsgDayMatterUser(_id);
-  Object.assign(form.value, res.data);
-  console.log(res.data);
-  form.value.userIdList = [res.data.userId];
-  dialog.visible = true;
-  dialog.title = '修改事件与用户关联';
+  Object.assign(editForm.value, res.data);
+  editDialog.value.title = '修改用户事件';
+  editDialog.value.visible = true;
 };
 
 /** 查看详情 */
 const handleDetail = async (row?: MsgDayMatterUserVO) => {
-  reset();
-  isMultiple.value = false;
+  cancelEdit(); // 确保重置表单状态
   isDetailView.value = true;
   const _id = row?.id || ids.value[0];
   const res = await getMsgDayMatterUser(_id);
-  Object.assign(form.value, res.data);
-  console.log(res.data);
-  form.value.userIdList = [res.data.userId];
-  dialog.visible = true;
-  dialog.title = '修改事件与用户关联';
+  Object.assign(editForm.value, res.data);
+  editDialog.value.visible = true;
+  editDialog.value.title = '用户事件详情';
 };
 
 /** 提交按钮 */
-const submitForm = () => {
-  msgDayMatterUserFormRef.value?.validate(async (valid: boolean) => {
+const submitAddForm = () => {
+  addFormRef.value?.validate(async (valid: boolean) => {
     if (valid) {
       buttonLoading.value = true;
-      if (form.value.id) {
-        await updateMsgDayMatterUser(form.value).finally(() => (buttonLoading.value = false));
-      } else {
-        await addMsgDayMatterUser(form.value).finally(() => (buttonLoading.value = false));
-      }
+      await addMsgDayMatterUser(addForm.value).finally(() => (buttonLoading.value = false));
       proxy?.$modal.msgSuccess('操作成功');
-      dialog.visible = false;
+      addDialog.value.visible = false;
+      await getList();
+    }
+  });
+};
+
+/** 修改按钮 */
+const submitEditForm = () => {
+  editFormRef.value?.validate(async (valid: boolean) => {
+    if (valid) {
+      buttonLoading.value = true;
+      editForm.value.userIdList = [editForm.value.userId];
+      await updateMsgDayMatterUser(editForm.value).finally(() => (buttonLoading.value = false));
+      proxy?.$modal.msgSuccess('操作成功');
+      editDialog.value.visible = false;
       await getList();
     }
   });
@@ -300,10 +335,6 @@ const handleExport = () => {
     `msgDayMatterUser_${new Date().getTime()}.xlsx`
   );
 };
-
-onMounted(() => {
-  getList();
-});
 </script>
 
 /* 使用common.scss中全部样式 */

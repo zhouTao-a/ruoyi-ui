@@ -17,6 +17,11 @@ export interface MsgMatterGroupVO {
 
 export interface MsgMatterGroupForm extends BaseEntity {
   /**
+   * 主键ID
+   */
+  id?: string | number;
+
+  /**
    * 事件ID
    */
   matterId?: string | number;

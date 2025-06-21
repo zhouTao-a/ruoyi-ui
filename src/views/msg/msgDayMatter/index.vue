@@ -315,6 +315,7 @@ const fetchGroupAndUserOptions = async () => {
 // 页面加载时获取分组数据
 onMounted(() => {
   fetchGroupAndUserOptions();
+  getList();
 });
 
 /** 查询事件列表 */
@@ -391,7 +392,7 @@ const handleDetail = async (row?: MsgDayMatterVO) => {
   const res = await getMsgDayMatter(_id);
   Object.assign(form.value, res.data);
   dialog.visible = true;
-  dialog.title = '修改事件';
+  dialog.title = '事件详情';
 };
 
 /** 提交按钮 */
@@ -430,10 +431,6 @@ const handleExport = () => {
     `msgDayMatter_${new Date().getTime()}.xlsx`
   );
 };
-
-onMounted(() => {
-  getList();
-});
 </script>
 
 /* 使用common.scss中全部样式 */

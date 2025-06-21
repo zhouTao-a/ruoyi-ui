@@ -281,6 +281,7 @@ const fetchUserOptions = async () => {
 // 页面加载时获取分组数据
 onMounted(() => {
   fetchUserOptions();
+  getList();
 });
 
 const queryFormRef = ref<ElFormInstance>();
@@ -476,10 +477,6 @@ const handleExport = () => {
     `msgUser_${new Date().getTime()}.xlsx`
   );
 };
-
-onMounted(() => {
-  getList();
-});
 </script>
 
 /* 使用common.scss中全部样式 */
