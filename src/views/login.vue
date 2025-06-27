@@ -5,12 +5,12 @@
         <h3 class="title">{{ title }}</h3>
         <lang-select />
       </div>
-<!--      <el-form-item v-if="tenantEnabled" prop="tenantId">-->
-<!--        <el-select v-model="loginForm.tenantId" filterable :placeholder="proxy.$t('login.selectPlaceholder')" style="width: 100%">-->
-<!--          <el-option v-for="item in tenantList" :key="item.tenantId" :label="item.companyName" :value="item.tenantId"></el-option>-->
-<!--          <template #prefix><svg-icon icon-class="company" class="el-input__icon input-icon" /></template>-->
-<!--        </el-select>-->
-<!--      </el-form-item>-->
+      <!--      <el-form-item v-if="tenantEnabled" prop="tenantId">-->
+      <!--        <el-select v-model="loginForm.tenantId" filterable :placeholder="proxy.$t('login.selectPlaceholder')" style="width: 100%">-->
+      <!--          <el-option v-for="item in tenantList" :key="item.tenantId" :label="item.companyName" :value="item.tenantId"></el-option>-->
+      <!--          <template #prefix><svg-icon icon-class="company" class="el-input__icon input-icon" /></template>-->
+      <!--        </el-select>-->
+      <!--      </el-form-item>-->
       <el-form-item prop="username">
         <el-input v-model="loginForm.username" type="text" size="large" auto-complete="off" :placeholder="proxy.$t('login.username')">
           <template #prefix><svg-icon icon-class="user" class="el-input__icon input-icon" /></template>
@@ -28,39 +28,39 @@
           <template #prefix><svg-icon icon-class="password" class="el-input__icon input-icon" /></template>
         </el-input>
       </el-form-item>
-<!--      <el-form-item v-if="captchaEnabled" prop="code">-->
-<!--        <el-input-->
-<!--          v-model="loginForm.code"-->
-<!--          size="large"-->
-<!--          auto-complete="off"-->
-<!--          :placeholder="proxy.$t('login.code')"-->
-<!--          style="width: 63%"-->
-<!--          @keyup.enter="handleLogin"-->
-<!--        >-->
-<!--          <template #prefix><svg-icon icon-class="validCode" class="el-input__icon input-icon" /></template>-->
-<!--        </el-input>-->
-<!--        <div class="login-code">-->
-<!--          <img :src="codeUrl" class="login-code-img" @click="getCode" />-->
-<!--        </div>-->
-<!--      </el-form-item>-->
+      <!--      <el-form-item v-if="captchaEnabled" prop="code">-->
+      <!--        <el-input-->
+      <!--          v-model="loginForm.code"-->
+      <!--          size="large"-->
+      <!--          auto-complete="off"-->
+      <!--          :placeholder="proxy.$t('login.code')"-->
+      <!--          style="width: 63%"-->
+      <!--          @keyup.enter="handleLogin"-->
+      <!--        >-->
+      <!--          <template #prefix><svg-icon icon-class="validCode" class="el-input__icon input-icon" /></template>-->
+      <!--        </el-input>-->
+      <!--        <div class="login-code">-->
+      <!--          <img :src="codeUrl" class="login-code-img" @click="getCode" />-->
+      <!--        </div>-->
+      <!--      </el-form-item>-->
       <el-checkbox v-model="loginForm.rememberMe" style="margin: 0 0 25px 0">{{ proxy.$t('login.rememberPassword') }}</el-checkbox>
-<!--      <el-form-item style="float: right">-->
-<!--        <el-button circle :title="proxy.$t('login.social.wechat')" @click="doSocialLogin('wechat')">-->
-<!--          <svg-icon icon-class="wechat" />-->
-<!--        </el-button>-->
-<!--        <el-button circle :title="proxy.$t('login.social.maxkey')" @click="doSocialLogin('maxkey')">-->
-<!--          <svg-icon icon-class="maxkey" />-->
-<!--        </el-button>-->
-<!--        <el-button circle :title="proxy.$t('login.social.topiam')" @click="doSocialLogin('topiam')">-->
-<!--          <svg-icon icon-class="topiam" />-->
-<!--        </el-button>-->
-<!--        <el-button circle :title="proxy.$t('login.social.gitee')" @click="doSocialLogin('gitee')">-->
-<!--          <svg-icon icon-class="gitee" />-->
-<!--        </el-button>-->
-<!--        <el-button circle :title="proxy.$t('login.social.github')" @click="doSocialLogin('github')">-->
-<!--          <svg-icon icon-class="github" />-->
-<!--        </el-button>-->
-<!--      </el-form-item>-->
+      <!--      <el-form-item style="float: right">-->
+      <!--        <el-button circle :title="proxy.$t('login.social.wechat')" @click="doSocialLogin('wechat')">-->
+      <!--          <svg-icon icon-class="wechat" />-->
+      <!--        </el-button>-->
+      <!--        <el-button circle :title="proxy.$t('login.social.maxkey')" @click="doSocialLogin('maxkey')">-->
+      <!--          <svg-icon icon-class="maxkey" />-->
+      <!--        </el-button>-->
+      <!--        <el-button circle :title="proxy.$t('login.social.topiam')" @click="doSocialLogin('topiam')">-->
+      <!--          <svg-icon icon-class="topiam" />-->
+      <!--        </el-button>-->
+      <!--        <el-button circle :title="proxy.$t('login.social.gitee')" @click="doSocialLogin('gitee')">-->
+      <!--          <svg-icon icon-class="gitee" />-->
+      <!--        </el-button>-->
+      <!--        <el-button circle :title="proxy.$t('login.social.github')" @click="doSocialLogin('github')">-->
+      <!--          <svg-icon icon-class="github" />-->
+      <!--        </el-button>-->
+      <!--      </el-form-item>-->
       <el-form-item style="width: 100%">
         <el-button :loading="loading" size="large" type="primary" style="width: 100%" @click.prevent="handleLogin">
           <span v-if="!loading">{{ proxy.$t('login.login') }}</span>
@@ -75,6 +75,8 @@
     <div class="el-login-footer">
       <img src="/src/assets/beian.png" alt="备案图标" style="width: 16px; height: 16px; margin-right: 4px" />
       <a href="https://beian.mps.gov.cn/#/query/webSearch?code=43010302002151" rel="noreferrer" target="_blank">湘公网安备43010302002151号</a>
+      &nbsp;
+      <a href="https://beian.miit.gov.cn" rel="noreferrer" target="_blank">湘ICP备2025124012号-1</a>
       &nbsp;
       <span>涵涵通知</span>
     </div>
@@ -159,7 +161,7 @@ const handleLogin = () => {
         loading.value = false;
         // 重新获取验证码
         if (captchaEnabled.value) {
-          await getCode();
+          // await getCode();
         }
       }
     } else {
