@@ -178,6 +178,11 @@ export const dynamicRoutes: RouteRecordRaw[] = [
     ]
   },
   {
+    path: '/dayMatter',
+    component: () => import('@/views/msg/msgDayMatter/dayMatter.vue'),
+    hidden: true
+  },
+  {
     path: '/workflow/design',
     component: Layout,
     hidden: true,
