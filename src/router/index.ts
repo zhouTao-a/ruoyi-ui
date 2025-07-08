@@ -88,6 +88,11 @@ export const constantRoutes: RouteRecordRaw[] = [
         meta: { title: '个人中心', icon: 'user' }
       }
     ]
+  },
+  {
+    path: '/day-matter',
+    component: () => import('@/views/msg/msgDayMatter/dayMatter.vue'),
+    hidden: true
   }
 ];
 
@@ -176,11 +181,6 @@ export const dynamicRoutes: RouteRecordRaw[] = [
         meta: { title: '请假申请', activeMenu: '/workflow/leave', noCache: true }
       }
     ]
-  },
-  {
-    path: '/dayMatter',
-    component: () => import('@/views/msg/msgDayMatter/dayMatter.vue'),
-    hidden: true
   },
   {
     path: '/workflow/design',
