@@ -32,3 +32,14 @@ export function dayNameList(params?: { dayName?: string; id?: string | number })
     params: params
   });
 }
+
+/**
+ * 获取事件列表
+ */
+export function dayMatterList(params?: { year?: number; month?: number }) {
+  return request({
+    url: '/msg/msgDayMatter/dayMatterList',
+    method: 'get',
+    params: params
+  });
+}
