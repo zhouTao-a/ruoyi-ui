@@ -36,7 +36,7 @@ export function dayNameList(params?: { dayName?: string; id?: string | number })
 /**
  * 获取事件列表
  */
-export function dayMatterList(params?: { year?: number; month?: number }) {
+export function dayMatterList(params?: { year?: number; month?: number; groupId?: string }) {
   return request({
     url: '/msg/msgDayMatter/dayMatterList',
     method: 'get',

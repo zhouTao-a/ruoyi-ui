@@ -6,6 +6,41 @@
   "description": "ruoyi-ui",
   "glyphs": [
     {
+      "icon_id": "5608874",
+      "name": "生日",
+      "font_class": "icon-shengri",
+      "unicode": "e618",
+      "unicode_decimal": 58904
+    },
+    {
+      "icon_id": "9148719",
+      "name": "工作台",
+      "font_class": "gongzuotai",
+      "unicode": "e650",
+      "unicode_decimal": 58960
+    },
+    {
+      "icon_id": "10278220",
+      "name": "提醒",
+      "font_class": "tixing",
+      "unicode": "e613",
+      "unicode_decimal": 58899
+    },
+    {
+      "icon_id": "13042465",
+      "name": "纪念日",
+      "font_class": "jinianri",
+      "unicode": "e60d",
+      "unicode_decimal": 58893
+    },
+    {
+      "icon_id": "20125904",
+      "name": "事件",
+      "font_class": "shijian",
+      "unicode": "e60a",
+      "unicode_decimal": 58890
+    },
+    {
       "icon_id": "17884760",
       "name": "农历",
       "font_class": "nongli",
@@ -53,13 +88,6 @@
       "font_class": "renyuanfenzu",
       "unicode": "e7c7",
       "unicode_decimal": 59335
-    },
-    {
-      "icon_id": "8148627",
-      "name": "生日",
-      "font_class": "shengri",
-      "unicode": "e606",
-      "unicode_decimal": 58886
     },
     {
       "icon_id": "15388306",

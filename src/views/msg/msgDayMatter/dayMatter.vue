@@ -16,14 +16,13 @@
           <div v-if="getSolarTerm(data.day)" class="solar-term">{{ getSolarTerm(data.day) }}</div>
           <div v-if="isToday(data.day)" class="today-mark"></div>
           <div v-if="hasReminder(data.day)" class="reminder">
-            <el-icon
+            <i
               v-for="(reminder, index) in getReminders(data.day).slice(0, 2)"
               :key="index"
-              class="reminder-icon"
-              :color="reminderColor(reminder)"
-            >
-              <component :is="reminderIcon(reminder.type)" />
-            </el-icon>
+              class="iconfont"
+              :class="reminderIcon(reminder.type)"
+              :style="{ color: reminderColor(reminder), marginRight: '6px', fontSize: '16px' }"
+            ></i>
           </div>
         </div>
       </template>
@@ -39,9 +38,7 @@
     >
       <ul v-if="selectedReminders.length">
         <li v-for="(item, index) in selectedReminders" :key="index" class="reminder-detail-item">
-          <el-icon :color="reminderColor(item)" style="margin-right: 6px">
-            <component :is="reminderIcon(item.type)" />
-          </el-icon>
+          <i class="iconfont" :class="reminderIcon(item.type)" :style="{ color: reminderColor(item), marginRight: '6px', fontSize: '16px' }"></i>
           {{ item.content }}
         </li>
       </ul>
@@ -58,9 +55,7 @@
           style="cursor: pointer"
           :title="item.content"
         >
-          <el-icon :color="reminderColor(item)" style="margin-right: 6px">
-            <component :is="reminderIcon(item.type)" />
-          </el-icon>
+          <i class="iconfont" :class="reminderIcon(item.type)" :style="{ color: reminderColor(item), marginRight: '6px', fontSize: '16px' }"></i>
           <span>{{ item.content }} - {{ formatDisplayDate(item) }}</span>
         </li>
       </ul>
@@ -72,7 +67,7 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { Lunar } from 'lunar-javascript';
 import { dayMatterList } from '@/api/msg/common';
-import { Calendar as CalendarIcon, User as UserIcon, Present as PresentIcon, StarFilled as StarIcon } from '@element-plus/icons-vue';
+import '@/assets/iconfont/iconfont.css';
 
 const value = ref(new Date());
 const selectedDate = ref('');
@@ -166,18 +161,17 @@ const getReminders = (dateStr: string) => {
 
 const reminderIcon = (type: string) =>
   ({
-    birthday: UserIcon,
-    anniversary: PresentIcon,
-    event: CalendarIcon,
-    default: StarIcon
-  })[type] || StarIcon;
+    birthday: 'icon-shengri',
+    anniversary: 'icon-jinianri',
+    work: 'icon-gongzuotai',
+    default: 'icon-tixing'
+  })[type] || 'icon-tixing';
 
 const reminderColor = (reminder: any) => {
   if (reminder.isLunar) return '#B46AFF';
   const map: Record<string, string> = {
     birthday: '#FF6B6B',
     anniversary: '#4ECDC4',
-    event: '#FFD166',
     default: '#6A0572'
   };
   return map[reminder.type] || map.default;
@@ -233,7 +227,7 @@ const lunarToSolar = (lunarMonth: number, lunarDay: number, year: number) => {
 };
 
 const fetchReminders = (year: number, month: number) => {
-  return dayMatterList({ year, month })
+  return dayMatterList({ year, month, groupId: '1935522589078200322' })
     .then((res) => {
       return res.data;
     })

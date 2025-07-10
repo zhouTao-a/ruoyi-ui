@@ -1,317 +1,308 @@
 <template>
-  <div class="app-container home">
+  <div class="home" @touchstart="onTouchStart" @touchend="onTouchEnd">
     <el-calendar v-model="value">
       <template #date-cell="{ data }">
-        <div class="date-content" :class="{ 'not-current-month': !isCurrentMonth(data.day) }">
+        <div
+          class="date-content"
+          :class="{
+            'not-current-month': !isCurrentMonth(data.day),
+            'selected-day': isSelectedDay(data.day)
+          }"
+          @click="selectDay(data.day)"
+        >
           <div class="solar-date">{{ getSolarDay(data.day) }}</div>
           <div class="lunar-date">{{ getLunarDate(data.day) }}</div>
-
-          <!-- 节假日和节气 -->
           <div v-if="getHoliday(data.day)" class="holiday">{{ getHoliday(data.day) }}</div>
           <div v-if="getSolarTerm(data.day)" class="solar-term">{{ getSolarTerm(data.day) }}</div>
-
-          <!-- 提醒事项 -->
-          <div v-if="hasReminder(data.day)" class="reminder">
-            <div v-for="(reminder, index) in getReminders(data.day)" :key="index" class="reminder-item">
-              <el-icon :color="reminderColor(reminder.type)" class="reminder-icon">
-                <component :is="reminderIcon(reminder.type)" />
-              </el-icon>
-              <span>{{ reminder.content }}</span>
-            </div>
-          </div>
-
-          <!-- 今日标记 -->
           <div v-if="isToday(data.day)" class="today-mark"></div>
+          <div v-if="hasReminder(data.day)" class="reminder">
+            <i
+              v-for="(reminder, index) in getReminders(data.day).slice(0, 2)"
+              :key="index"
+              class="iconfont"
+              :class="reminderIcon(reminder.type)"
+              :style="{ color: reminderColor(reminder), marginRight: '6px', fontSize: '16px' }"
+            ></i>
+          </div>
         </div>
       </template>
     </el-calendar>
+
+    <!-- 弹窗显示选中日期事件详情 -->
+    <el-dialog
+      :title="selectedDate ? `${getFriendlyDate(selectedDate)} ` : ''"
+      v-model="showDialog"
+      width="90%"
+      :modal-append-to-body="false"
+      @close="showDialog = false"
+    >
+      <ul v-if="selectedReminders.length">
+        <li v-for="(item, index) in selectedReminders" :key="index" class="reminder-detail-item">
+          <i class="iconfont" :class="reminderIcon(item.type)" :style="{ color: reminderColor(item), marginRight: '6px', fontSize: '16px' }"></i>
+          {{ item.content }}
+        </li>
+      </ul>
+    </el-dialog>
+
+    <!-- 页面底部展示当前月所有提醒 -->
+    <div class="month-reminder-list">
+      <ul>
+        <li
+          v-for="(item, index) in monthReminders"
+          :key="index"
+          class="reminder-detail-item"
+          @click="selectDay(item.isLunar ? lunarToSolar(item.lunarMonth, item.lunarDay, currentYear) : item.date)"
+          style="cursor: pointer"
+          :title="item.content"
+        >
+          <i class="iconfont" :class="reminderIcon(item.type)" :style="{ color: reminderColor(item), marginRight: '6px', fontSize: '16px' }"></i>
+          <span>{{ item.content }} - {{ formatDisplayDate(item) }}</span>
+        </li>
+      </ul>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { Lunar } from 'lunar-javascript';
-import { Calendar as CalendarIcon, User as UserIcon, Present as PresentIcon, StarFilled as StarIcon } from '@element-plus/icons-vue';
+import { dayMatterList } from '@/api/msg/common';
+import '@/assets/iconfont/iconfont.css';
 
-// 当前选中的日期
 const value = ref(new Date());
+const selectedDate = ref('');
+const showDialog = ref(false);
+const reminders = ref<any[]>([]);
 
-// 提醒事项数据（模拟API返回的数据）
-const reminders = ref([
-  { date: '2023-06-15', type: 'birthday', content: '张三生日' },
-  { date: '2023-06-18', type: 'anniversary', content: '结婚纪念日' },
-  { date: '2023-06-22', type: 'event', content: '团队会议' },
-  { date: '2023-06-25', type: 'birthday', content: '李四生日' },
-  { date: '2023-07-01', type: 'event', content: '项目截止日' }
-]);
-
-// 获取当前月/年
 const currentMonth = computed(() => value.value.getMonth());
 const currentYear = computed(() => value.value.getFullYear());
 
-// 检查日期是否是当前月
 const isCurrentMonth = (dateStr: string) => {
   const date = new Date(dateStr);
   return date.getMonth() === currentMonth.value && date.getFullYear() === currentYear.value;
 };
 
-// 获取公历日期（只显示日）
-const getSolarDay = (dateStr: string) => {
-  const date = new Date(dateStr);
-  return date.getDate();
-};
+const isSelectedDay = (dateStr: string) => selectedDate.value === formatDate(dateStr);
 
-// 获取农历日期
+const getSolarDay = (dateStr: string) => new Date(dateStr).getDate();
+
 const getLunarDate = (dateStr: string) => {
   const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return '';
   const lunar = Lunar.fromDate(date);
-
-  // 如果是初一，显示月份，否则显示日
-  if (lunar.getDay() === 1) {
-    return lunar.getMonthInChinese() + '月';
-  }
-  return lunar.getDayInChinese();
+  return lunar.getDay() === 1 ? lunar.getMonthInChinese() + '月' : lunar.getDayInChinese();
 };
 
-// 获取节假日
 const getHoliday = (dateStr: string) => {
   const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return '';
   const lunar = Lunar.fromDate(date);
   const festivals = lunar.getFestivals();
-
-  // 只显示第一个节假日
-  if (festivals.length > 0) {
-    return festivals[0];
-  }
-
-  // 特殊处理一些公历节日
-  const solarFestivals: Record<string, string> = {
+  if (festivals.length) return festivals[0];
+  const map: Record<string, string> = {
     '0101': '元旦',
     '0501': '劳动节',
     '1001': '国庆节'
   };
-
-  const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  const day = date.getDate().toString().padStart(2, '0');
-  const monthDay = `${month}${day}`;
-  return solarFestivals[monthDay] || '';
+  const key = `${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}`;
+  return map[key] || '';
 };
 
-// 获取节气
+const formatDisplayDate = (item: any): string => {
+  if (item.isLunar) {
+    // 把农历转换为公历日期
+    const lunar = Lunar.fromYmd(currentYear.value, item.lunarMonth, item.lunarDay);
+    const solarDate = lunar.getSolar().toYmd();
+    const date = new Date(solarDate);
+    return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+  } else {
+    const date = new Date(item.date);
+    return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+  }
+};
+
 const getSolarTerm = (dateStr: string) => {
   const date = new Date(dateStr);
-  const lunar = Lunar.fromDate(date);
-  return lunar.getJieQi();
+  if (isNaN(date.getTime())) return '';
+  return Lunar.fromDate(date).getJieQi() || '';
 };
 
-// 判断是否是今天
 const isToday = (dateStr: string) => {
   const today = new Date();
   const date = new Date(dateStr);
   return today.toDateString() === date.toDateString();
 };
 
-// 检查日期是否有提醒事项
-const hasReminder = (dateStr: string) => {
-  const formattedDate = formatDate(dateStr);
-  return reminders.value.some((reminder) => reminder.date === formattedDate);
+const formatDate = (dateStr: string | Date) => {
+  const d = new Date(dateStr);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 };
 
-// 获取日期对应的提醒事项
+const getFriendlyDate = (dateStr: string) => {
+  const d = new Date(dateStr);
+  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
+};
+
+const hasReminder = (dateStr: string) => getReminders(dateStr).length > 0;
+
 const getReminders = (dateStr: string) => {
-  const formattedDate = formatDate(dateStr);
-  return reminders.value.filter((reminder) => reminder.date === formattedDate);
-};
-
-// 格式化日期为 YYYY-MM-DD
-const formatDate = (dateStr: string) => {
+  const solar = formatDate(dateStr);
   const date = new Date(dateStr);
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
+  if (isNaN(date.getTime())) return [];
+  const lunar = Lunar.fromDate(date);
+  return reminders.value.filter((r) => {
+    if (r.isLunar) {
+      return r.lunarMonth === lunar.getMonth() && r.lunarDay === lunar.getDay();
+    } else {
+      return r.date === solar;
+    }
+  });
 };
 
-// 获取提醒事项图标
-const reminderIcon = (type: string) => {
-  const icons: Record<string, any> = {
-    birthday: UserIcon,
-    anniversary: PresentIcon,
-    event: CalendarIcon,
-    default: StarIcon
-  };
-  return icons[type] || icons.default;
-};
+const reminderIcon = (type: string) =>
+  ({
+    birthday: 'icon-shengri',
+    anniversary: 'icon-jinianri',
+    work: 'icon-gongzuotai',
+    default: 'icon-tixing'
+  })[type] || 'icon-tixing';
 
-// 获取提醒事项颜色
-const reminderColor = (type: string) => {
-  const colors: Record<string, string> = {
+const reminderColor = (reminder: any) => {
+  if (reminder.isLunar) return '#B46AFF';
+  const map: Record<string, string> = {
     birthday: '#FF6B6B',
     anniversary: '#4ECDC4',
-    event: '#FFD166',
     default: '#6A0572'
   };
-  return colors[type] || colors.default;
+  return map[reminder.type] || map.default;
 };
 
-// 模拟从API获取提醒事项
-const fetchReminders = async (year: number, month: number) => {
-  // 这里应该是实际的API调用
-  console.log(`Fetching reminders for ${year}-${month}`);
-
-  // 模拟API延迟
-  await new Promise((resolve) => setTimeout(resolve, 300));
-
-  // 在实际应用中，这里会返回API数据
-  // 现在使用模拟数据
-  return [
-    { date: `${year}-${String(month).padStart(2, '0')}-22`, type: 'birthday', content: '张三生日' },
-    { date: `${year}-${String(month).padStart(2, '0')}-22`, type: 'anniversary', content: '结婚纪念日' },
-    { date: `${year}-${String(month).padStart(2, '0')}-22`, type: 'event', content: '团队会议' },
-    { date: `${year}-${String(month).padStart(2, '0')}-22`, type: 'birthday', content: '李四生日' }
-  ];
+const selectDay = (dateStr: string) => {
+  const formatted = formatDate(dateStr);
+  const remindersForDate = getReminders(formatted);
+  if (remindersForDate.length > 0) {
+    selectedDate.value = formatted;
+    showDialog.value = true;
+  }
 };
 
-// 当月份/年份变化时重新加载提醒事项
-onMounted(() => {
-  const year = currentYear.value;
-  const month = currentMonth.value + 1;
-  fetchReminders(year, month).then((data) => {
-    reminders.value = data;
+// 当前选中日期提醒
+const selectedReminders = computed(() => getReminders(selectedDate.value));
+
+// 计算当前月所有提醒事项（公历和农历都包含）
+const monthReminders = computed(() => {
+  const listWithDate = reminders.value.map((item) => {
+    let date: Date;
+
+    if (item.isLunar) {
+      const lunar = Lunar.fromYmd(currentYear.value, item.lunarMonth, item.lunarDay);
+      const solar = lunar.getSolar(); // { getYear(), getMonth(), getDay() }
+      date = new Date(`${solar.getYear()}-${solar.getMonth().toString().padStart(2, '0')}-${solar.getDay().toString().padStart(2, '0')}`);
+    } else {
+      date = new Date(item.date);
+    }
+
+    return { ...item, displayDate: date };
   });
+
+  // 只保留本月数据
+  const filtered = listWithDate.filter((item) => {
+    const d = item.displayDate;
+    return d.getFullYear() === currentYear.value && d.getMonth() === currentMonth.value;
+  });
+
+  // 按照日期升序排序
+  return filtered.sort((a, b) => a.displayDate.getTime() - b.displayDate.getTime());
 });
 
-// 监听日历变化
-watch(value, (newVal) => {
-  const year = newVal.getFullYear();
-  const month = newVal.getMonth() + 1;
-  fetchReminders(year, month).then((data) => {
+// 简单农历转公历日期，默认使用当年
+const lunarToSolar = (lunarMonth: number, lunarDay: number, year: number) => {
+  try {
+    const lunar = Lunar.fromYmd(year, lunarMonth, lunarDay);
+    const solarDate = lunar.getSolar().toDate();
+    return formatDate(solarDate);
+  } catch {
+    return '';
+  }
+};
+
+const fetchReminders = (year: number, month: number) => {
+  return dayMatterList({ year, month, groupId: null })
+    .then((res) => {
+      return res.data;
+    })
+    .catch(() => {
+      return [];
+    });
+};
+
+watch([currentYear, currentMonth], ([newYear, newMonth], [oldYear, oldMonth]) => {
+  // 只有当年月发生变化时才调用
+  if (newYear !== oldYear || newMonth !== oldMonth) {
+    loadReminders();
+  }
+});
+
+const loadReminders = () => {
+  const y = currentYear.value;
+  const m = currentMonth.value + 1;
+  fetchReminders(y, m).then((data) => {
     reminders.value = data;
   });
-});
+};
+
+onMounted(loadReminders);
+
+// 滑动切换月份
+let startX = 0;
+const onTouchStart = (e: TouchEvent) => {
+  startX = e.touches[0].clientX;
+};
+const onTouchEnd = (e: TouchEvent) => {
+  const endX = e.changedTouches[0].clientX;
+  const diff = endX - startX;
+  if (Math.abs(diff) > 50) {
+    const newDate = new Date(value.value);
+    newDate.setMonth(newDate.getMonth() + (diff < 0 ? 1 : -1));
+    value.value = newDate;
+  }
+};
 </script>
 
 <style scoped lang="scss">
 .home {
-  width: 100%;
-  min-height: calc(100vh - 84px);
-  padding: 16px;
+  padding: 12px;
   background: #f7f7f7;
-  overflow-y: auto;
 }
-
-// 日历头部样式
-:deep(.el-calendar__header) {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 20px;
-  background-color: #f0f5ff;
-  border-bottom: 1px solid #ebeef5;
-}
-
-:deep(.el-calendar__title) {
-  font-size: 18px;
-  font-weight: 600;
-  color: #409eff;
-}
-
-:deep(.el-calendar-table) {
-  width: 100%;
-}
-
-:deep(.el-calendar-table thead th) {
-  padding: 12px 0;
-  color: #606266;
-  font-weight: 600;
-  background-color: #f8f9fa;
-}
-
-// 非当前月样式
-:deep(.el-calendar-table:not(.is-range) td.next),
-:deep(.el-calendar-table:not(.is-range) td.prev) {
-  .date-content {
-    color: #c0c4cc;
-
-    .solar-date,
-    .lunar-date {
-      color: #c0c4cc;
-    }
-  }
-}
-
-:deep(.el-calendar-table td) {
-  border: none;
-  vertical-align: top;
-  height: 110px; /* 增加高度以容纳提醒事项 */
-  padding: 4px;
-}
-
-:deep(.el-calendar-table td.is-selected) {
-  background-color: #f0f7ff;
-}
-
-:deep(.el-calendar-table .el-calendar-day) {
-  height: 100%;
-  padding: 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-  position: relative;
-}
-
-:deep(.el-calendar-table .el-calendar-day:hover) {
-  background-color: #f5f7fa;
-  transform: translateY(-3px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-}
-
-/* 日期内容样式 */
 .date-content {
-  width: 100%;
   height: 100%;
   position: relative;
-
-  &.not-current-month {
-    opacity: 0.6;
-  }
+  cursor: pointer;
+  transition: all 0.25s ease-in-out;
 }
-
+.date-content.selected-day {
+  background-color: #f0f9ff;
+  border-radius: 6px;
+  transform: scale(1.03);
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.1);
+}
+.date-content.not-current-month {
+  opacity: 0.4;
+}
 .solar-date {
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 4px;
-  color: #303133;
+  font-size: 16px;
+  font-weight: bold;
 }
-
 .lunar-date {
   font-size: 12px;
-  color: #909399;
-  margin-bottom: 4px;
+  color: #888;
 }
-
-.holiday {
-  font-size: 12px;
-  color: #e74c3c;
-  font-weight: 500;
-  padding: 2px 4px;
-  border-radius: 4px;
-  background: rgba(231, 76, 60, 0.1);
-  margin-top: 2px;
-}
-
+.holiday,
 .solar-term {
   font-size: 12px;
-  color: #27ae60;
-  font-weight: 500;
-  padding: 2px 4px;
-  border-radius: 4px;
-  background: rgba(39, 174, 96, 0.1);
+  color: #e74c3c;
   margin-top: 2px;
 }
-
 .today-mark {
   position: absolute;
   top: 5px;
@@ -321,28 +312,32 @@ watch(value, (newVal) => {
   background-color: #409eff;
   border-radius: 50%;
 }
-
-/* 提醒事项样式 */
-.reminder {
-  margin-top: 4px;
-  width: 100%;
+.reminder-icon {
+  font-size: 14px;
+  margin-right: 2px;
 }
-
-.reminder-item {
+.reminder-detail-list {
+  margin-top: 12px;
+  padding: 12px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+.reminder-detail-list h4 {
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+.reminder-detail-item {
   display: flex;
   align-items: center;
-  font-size: 11px;
-  padding: 2px 4px;
-  border-radius: 4px;
-  background: rgba(0, 0, 0, 0.03);
-  margin-top: 2px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-
-  .reminder-icon {
-    margin-right: 4px;
-    font-size: 12px;
-  }
+  padding: 6px 0;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+}
+.reminder-detail-item:last-child {
+  border-bottom: none;
+}
+.month-reminder-list {
+  margin-top: 20px;
 }
 </style>
