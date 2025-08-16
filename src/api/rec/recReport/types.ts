@@ -58,12 +58,12 @@ export interface RecReportQuery extends PageQuery {
   reportType?: string;
 
   /**
-   * 日期
+   * 报告开始日期
    */
-  reportDate?: string;
+  beginReportDate?: string | Date | number;
 
   /**
-   * 日期范围参数
+   * 报告结束日期
    */
-  params?: any;
+  endReportDate?: string | Date | number;
 }

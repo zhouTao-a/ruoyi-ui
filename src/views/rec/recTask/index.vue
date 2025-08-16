@@ -55,8 +55,8 @@
       <el-table v-loading="loading" :data="recTaskList" @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" align="center" />
         <el-table-column label="主键ID" align="center" prop="id" v-if="false" />
-        <el-table-column label="标题" align="center" prop="title" min-width="120" />
-        <el-table-column label="描述" align="center" prop="description" min-width="240" />
+        <el-table-column label="标题" align="center" show-overflow-tooltip prop="title" min-width="120" />
+        <el-table-column label="描述" align="center" show-overflow-tooltip prop="description" min-width="240" />
         <el-table-column label="状态" align="center" prop="status" min-width="80" fixed="right">
           <template #default="scope">
             <dict-tag :options="task_status" :value="scope.row.status" />
@@ -100,9 +100,6 @@
         <el-form-item label="标题" prop="title">
           <el-input ref="titleInputRef" v-model="form.title" placeholder="请输入标题" :disabled="isDetailView" />
         </el-form-item>
-        <el-form-item label="描述" prop="description">
-          <el-input v-model="form.description" type="textarea" placeholder="请输入内容" :disabled="isDetailView" />
-        </el-form-item>
         <el-form-item label="状态" prop="status">
           <el-select v-model="form.status" placeholder="请选择状态" :disabled="isDetailView">
             <el-option v-for="dict in task_status" :key="dict.value" :label="dict.label" :value="dict.value"></el-option>
@@ -130,10 +127,13 @@
             style="width: 100%"
           ></el-date-picker>
         </el-form-item>
-        <el-form-item label="优先级" prop="priority" style="margin-bottom: 2px; width: 100%">
+        <el-form-item label="优先级" prop="priority" style="width: 100%">
           <el-select v-model="form.priority" placeholder="请选择优先级" :disabled="isDetailView">
             <el-option v-for="dict in priority" :key="dict.value" :label="dict.label" :value="dict.value"></el-option>
           </el-select>
+        </el-form-item>
+        <el-form-item label="描述" prop="description" style="margin-bottom: 2px; width: 100%">
+          <el-input v-model="form.description" type="textarea" placeholder="请输入内容" :rows="10" :disabled="isDetailView" />
         </el-form-item>
       </el-form>
       <template #footer>
