@@ -52,7 +52,7 @@
       >
         <el-table-column label="父目标" align="center" prop="parentId" />
         <el-table-column label="标题" align="center" prop="title" />
-        <el-table-column label="描述" align="center" prop="description" />
+        <el-table-column label="内容" align="center" prop="content" />
         <el-table-column label="进度" align="center" prop="progress" />
         <el-table-column label="状态" align="center" prop="status" />
         <el-table-column label="截止日期" align="center" prop="deadLine" width="180">
@@ -92,19 +92,14 @@
         <el-form-item label="标题" prop="title">
           <el-input v-model="form.title" placeholder="请输入标题" />
         </el-form-item>
-        <el-form-item label="描述" prop="description">
-          <el-input v-model="form.description" type="textarea" placeholder="请输入内容" />
+        <el-form-item label="内容" prop="description">
+          <el-input v-model="form.content" type="textarea" placeholder="请输入内容" />
         </el-form-item>
         <el-form-item label="进度" prop="progress">
           <el-input v-model="form.progress" placeholder="请输入进度" />
         </el-form-item>
         <el-form-item label="截止日期" prop="deadLine">
-          <el-date-picker clearable
-            v-model="form.deadLine"
-            type="datetime"
-            value-format="YYYY-MM-DD HH:mm:ss"
-            placeholder="选择截止日期"
-          />
+          <el-date-picker clearable v-model="form.deadLine" type="datetime" value-format="YYYY-MM-DD HH:mm:ss" placeholder="选择截止日期" />
         </el-form-item>
         <el-form-item label="排序" prop="sortOrder">
           <el-input v-model="form.sortOrder" placeholder="请输入排序" />
@@ -121,17 +116,16 @@
 </template>
 
 <script setup name="RecGoal" lang="ts">
-import { listRecGoal, getRecGoal, delRecGoal, addRecGoal, updateRecGoal } from "@/api/rec/recGoal";
+import { listRecGoal, getRecGoal, delRecGoal, addRecGoal, updateRecGoal } from '@/api/rec/recGoal';
 import { RecGoalVO, RecGoalQuery, RecGoalForm } from '@/api/rec/recGoal/types';
 
 type RecGoalOption = {
   id: number;
   title: string;
   children?: RecGoalOption[];
-}
+};
 
-const { proxy } = getCurrentInstance() as ComponentInternalInstance;;
-
+const { proxy } = getCurrentInstance() as ComponentInternalInstance;
 
 const recGoalList = ref<RecGoalVO[]>([]);
 const recGoalOptions = ref<RecGoalOption[]>([]);
@@ -142,39 +136,38 @@ const loading = ref(false);
 
 const queryFormRef = ref<ElFormInstance>();
 const recGoalFormRef = ref<ElFormInstance>();
-const recGoalTableRef = ref<ElTableInstance>()
+const recGoalTableRef = ref<ElTableInstance>();
 
 const dialog = reactive<DialogOption>({
-    visible: false,
-    title: ''
+  visible: false,
+  title: ''
 });
 
 const dateRangedeadLine = ref<[DateModelType, DateModelType]>(['', '']);
 
 const initFormData: RecGoalForm = {
-    parentId: undefined,
-    title: undefined,
-    description: undefined,
-    progress: undefined,
-    status: undefined,
-    deadLine: undefined,
-    sortOrder: undefined,
-}
+  id: undefined,
+  parentId: undefined,
+  title: undefined,
+  content: undefined,
+  progress: undefined,
+  status: undefined,
+  deadLine: undefined,
+  sortOrder: undefined
+};
 
 const data = reactive<PageData<RecGoalForm, RecGoalQuery>>({
-  form: {...initFormData},
+  form: { ...initFormData },
   queryParams: {
     parentId: undefined,
     title: undefined,
     status: undefined,
     params: {
-      deadLine: undefined,
+      deadLine: undefined
     }
   },
   rules: {
-    title: [
-      { required: true, message: "标题不能为空", trigger: "blur" }
-    ],
+    title: [{ required: true, message: '标题不能为空', trigger: 'blur' }]
   }
 });
 
@@ -186,45 +179,45 @@ const getList = async () => {
   queryParams.value.params = {};
   proxy?.addDateRange(queryParams.value, dateRangedeadLine.value, 'deadLine');
   const res = await listRecGoal(queryParams.value);
-  const data = proxy?.handleTree<RecGoalVO>(res.data, "id", "parentId");
+  const data = proxy?.handleTree<RecGoalVO>(res.data, 'id', 'parentId');
   if (data) {
     recGoalList.value = data;
     loading.value = false;
   }
-}
+};
 
 /** 查询目标下拉树结构 */
 const getTreeselect = async () => {
   const res = await listRecGoal();
   recGoalOptions.value = [];
   const data: RecGoalOption = { id: 0, title: '顶级节点', children: [] };
-  data.children = proxy?.handleTree<RecGoalOption>(res.data, "id", "parentId");
+  data.children = proxy?.handleTree<RecGoalOption>(res.data, 'id', 'parentId');
   recGoalOptions.value.push(data);
-}
+};
 
 // 取消按钮
 const cancel = () => {
   reset();
   dialog.visible = false;
-}
+};
 
 // 表单重置
 const reset = () => {
-  form.value = {...initFormData}
+  form.value = { ...initFormData };
   recGoalFormRef.value?.resetFields();
-}
+};
 
 /** 搜索按钮操作 */
 const handleQuery = () => {
   getList();
-}
+};
 
 /** 重置按钮操作 */
 const resetQuery = () => {
   dateRangedeadLine.value = ['', ''];
   queryFormRef.value?.resetFields();
   handleQuery();
-}
+};
 
 /** 新增按钮操作 */
 const handleAdd = (row?: RecGoalVO) => {
@@ -236,22 +229,22 @@ const handleAdd = (row?: RecGoalVO) => {
     form.value.parentId = 0;
   }
   dialog.visible = true;
-  dialog.title = "添加目标";
-}
+  dialog.title = '添加目标';
+};
 
 /** 展开/折叠操作 */
 const handleToggleExpandAll = () => {
   isExpandAll.value = !isExpandAll.value;
-  toggleExpandAll(recGoalList.value, isExpandAll.value)
-}
+  toggleExpandAll(recGoalList.value, isExpandAll.value);
+};
 
 /** 展开/折叠操作 */
 const toggleExpandAll = (data: RecGoalVO[], status: boolean) => {
   data.forEach((item) => {
-    recGoalTableRef.value?.toggleRowExpansion(item, status)
-    if (item.children && item.children.length > 0) toggleExpandAll(item.children, status)
-  })
-}
+    recGoalTableRef.value?.toggleRowExpansion(item, status);
+    if (item.children && item.children.length > 0) toggleExpandAll(item.children, status);
+  });
+};
 
 /** 修改按钮操作 */
 const handleUpdate = async (row: RecGoalVO) => {
@@ -263,8 +256,8 @@ const handleUpdate = async (row: RecGoalVO) => {
   const res = await getRecGoal(row.id);
   Object.assign(form.value, res.data);
   dialog.visible = true;
-  dialog.title = "修改目标";
-}
+  dialog.title = '修改目标';
+};
 
 /** 提交按钮 */
 const submitForm = () => {
@@ -272,25 +265,25 @@ const submitForm = () => {
     if (valid) {
       buttonLoading.value = true;
       if (form.value.id) {
-        await updateRecGoal(form.value).finally(() => buttonLoading.value = false);
+        await updateRecGoal(form.value).finally(() => (buttonLoading.value = false));
       } else {
-        await addRecGoal(form.value).finally(() => buttonLoading.value = false);
+        await addRecGoal(form.value).finally(() => (buttonLoading.value = false));
       }
-      proxy?.$modal.msgSuccess("操作成功");
+      proxy?.$modal.msgSuccess('操作成功');
       dialog.visible = false;
       getList();
     }
   });
-}
+};
 
 /** 删除按钮操作 */
 const handleDelete = async (row: RecGoalVO) => {
   await proxy?.$modal.confirm('是否确认删除目标编号为"' + row.id + '"的数据项？');
   loading.value = true;
-  await delRecGoal(row.id).finally(() => loading.value = false);
+  await delRecGoal(row.id).finally(() => (loading.value = false));
   await getList();
-  proxy?.$modal.msgSuccess("删除成功");
-}
+  proxy?.$modal.msgSuccess('删除成功');
+};
 
 onMounted(() => {
   getList();

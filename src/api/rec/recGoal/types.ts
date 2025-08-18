@@ -15,9 +15,9 @@ export interface RecGoalVO {
   title: string;
 
   /**
-   * 描述
+   * 内容
    */
-  description: string;
+  content: string;
 
   /**
    * 进度
@@ -62,9 +62,9 @@ export interface RecGoalForm extends BaseEntity {
   title?: string;
 
   /**
-   * 描述
+   * 内容
    */
-  description?: string;
+  content?: string;
 
   /**
    * 进度
