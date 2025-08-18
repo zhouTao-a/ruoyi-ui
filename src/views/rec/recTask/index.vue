@@ -79,7 +79,7 @@
               <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['rec:recTask:edit']"></el-button>
             </el-tooltip>
             <el-tooltip content="详情" placement="top">
-              <el-button link type="primary" @click="handleDetail(scope.row)" v-hasPermi="['msg:msgUser:detail']">
+              <el-button link type="primary" @click="handleDetail(scope.row)" v-hasPermi="['rec:recReport:detail']">
                 <template #default>
                   <img src="@/assets/mes/Frame2.png" />
                 </template>
@@ -217,7 +217,6 @@ const getList = async () => {
 
 const titleInputRef = ref<InstanceType<typeof ElInput> | null>(null);
 const handleDialogOpened = () => {
-  console.log('handleDialogOpened');
   nextTick(() => {
     if (titleInputRef.value) {
       // 获取输入框的DOM元素并聚焦

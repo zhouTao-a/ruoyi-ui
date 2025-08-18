@@ -10,7 +10,12 @@ export interface RecReflectionVO {
   title: string;
 
   /**
-   * 内容
+   * 概要
+   */
+  synopsis: string;
+
+  /**
+   * 感想
    */
   content: string;
 
@@ -42,7 +47,12 @@ export interface RecReflectionForm extends BaseEntity {
   title?: string;
 
   /**
-   * 内容
+   * 概要
+   */
+  synopsis?: string;
+
+  /**
+   * 感想
    */
   content?: string;
 
@@ -69,7 +79,7 @@ export interface RecReflectionQuery extends PageQuery {
   title?: string;
 
   /**
-   * 日期范围参数
+   * 类型
    */
-  params?: any;
+  sourceType?: string;
 }

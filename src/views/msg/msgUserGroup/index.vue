@@ -84,7 +84,7 @@
               <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['msg:msgUserGroup:edit']"></el-button>
             </el-tooltip>
             <el-tooltip content="详情" placement="top">
-              <el-button link type="primary" @click="handleDetail(scope.row)" v-hasPermi="['msg:msgUser:detail']">
+              <el-button link type="primary" @click="handleDetail(scope.row)" v-hasPermi="['msg:msgUserGroup:detail']">
                 <template #default>
                   <img src="@/assets/mes/Frame2.png" />
                 </template>

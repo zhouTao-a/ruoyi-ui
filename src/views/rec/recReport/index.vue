@@ -72,7 +72,7 @@
               <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['rec:recReport:edit']"></el-button>
             </el-tooltip>
             <el-tooltip content="详情" placement="top">
-              <el-button link type="primary" @click="handleDetail(scope.row)" v-hasPermi="['msg:msgUser:detail']">
+              <el-button link type="primary" @click="handleDetail(scope.row)" v-hasPermi="['rec:recReport:detail']">
                 <template #default>
                   <img src="@/assets/mes/Frame2.png" />
                 </template>
@@ -110,7 +110,7 @@
           >
           </el-date-picker>
         </el-form-item>
-        <el-form-item label="内容" prop="description" style="margin-bottom: 2px; width: 100%">
+        <el-form-item label="内容" prop="content" style="margin-bottom: 2px; width: 100%">
           <el-input v-model="form.content" type="textarea" placeholder="请输入内容" :rows="10" :disabled="isDetailView" />
         </el-form-item>
       </el-form>
