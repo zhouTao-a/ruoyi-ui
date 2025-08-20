@@ -5,6 +5,16 @@ export interface RecGoalVO {
   id: string | number;
 
   /**
+   * 层级
+   */
+  level: number;
+
+  /**
+   * 顶层ID
+   */
+  topId: string | number;
+
+  /**
    * 父目标
    */
   parentId: string | number;
@@ -52,6 +62,16 @@ export interface RecGoalForm extends BaseEntity {
   id: string | number;
 
   /**
+   * 层级
+   */
+  level: number;
+
+  /**
+   * 顶层ID
+   */
+  topId: string | number;
+
+  /**
    * 父目标
    */
   parentId?: string | number;
@@ -87,12 +107,7 @@ export interface RecGoalForm extends BaseEntity {
   sortOrder?: number;
 }
 
-export interface RecGoalQuery {
-  /**
-   * 父目标
-   */
-  parentId?: string | number;
-
+export interface RecGoalQuery extends PageQuery {
   /**
    * 标题
    */
@@ -104,12 +119,12 @@ export interface RecGoalQuery {
   status?: string;
 
   /**
-   * 截止日期
+   * 截止开始日期
    */
-  deadLine?: string;
+  beginDeadLine?: string | Date | number;
 
   /**
-   * 日期范围参数
+   * 截止结束日期
    */
-  params?: any;
+  endDeadLine?: string | Date | number;
 }
