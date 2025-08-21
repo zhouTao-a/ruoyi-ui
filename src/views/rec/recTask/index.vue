@@ -56,7 +56,7 @@
         <el-table-column type="selection" width="55" align="center" />
         <el-table-column label="主键ID" align="center" prop="id" v-if="false" />
         <el-table-column label="标题" align="center" show-overflow-tooltip prop="title" min-width="120" />
-        <el-table-column label="描述" align="center" show-overflow-tooltip prop="description" min-width="240" />
+        <el-table-column label="描述" align="center" show-overflow-tooltip prop="content" min-width="240" />
         <el-table-column label="状态" align="center" prop="status" min-width="80" fixed="right">
           <template #default="scope">
             <dict-tag :options="task_status" :value="scope.row.status" />
@@ -132,8 +132,8 @@
             <el-option v-for="dict in priority" :key="dict.value" :label="dict.label" :value="dict.value"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="描述" prop="description" style="margin-bottom: 2px; width: 100%">
-          <el-input v-model="form.description" type="textarea" placeholder="请输入内容" :rows="10" :disabled="isDetailView" />
+        <el-form-item label="描述" prop="content" style="margin-bottom: 2px; width: 100%">
+          <el-input v-model="form.content" type="textarea" placeholder="请输入内容" :rows="10" :disabled="isDetailView" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -178,7 +178,7 @@ const dialog = reactive<DialogOption>({
 const initFormData: RecTaskForm = {
   id: undefined,
   title: undefined,
-  description: undefined,
+  content: undefined,
   status: undefined,
   progress: undefined,
   deadLine: undefined,
@@ -196,7 +196,7 @@ const data = reactive<PageData<RecTaskForm, RecTaskQuery>>({
   },
   rules: {
     title: [{ required: true, message: '标题不能为空', trigger: 'blur' }],
-    description: [{ required: true, message: '描述不能为空', trigger: 'blur' }],
+    content: [{ required: true, message: '描述不能为空', trigger: 'blur' }],
     priority: [{ required: true, message: '优先级不能为空', trigger: 'change' }],
     status: [{ required: true, message: '状态不能为空', trigger: 'change' }]
   }
@@ -266,6 +266,7 @@ const handleAdd = () => {
   isDetailView.value = false;
   form.value.priority = 'high';
   form.value.status = 'pending';
+  form.value.progress = 0;
   dialog.visible = true;
   dialog.title = '添加任务';
 };

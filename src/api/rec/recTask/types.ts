@@ -12,7 +12,7 @@ export interface RecTaskVO {
   /**
    * 描述
    */
-  description: string;
+  content: string;
 
   /**
    * 状态
@@ -49,7 +49,7 @@ export interface RecTaskForm extends BaseEntity {
   /**
    * 描述
    */
-  description?: string;
+  content?: string;
 
   /**
    * 状态

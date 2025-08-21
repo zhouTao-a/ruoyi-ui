@@ -93,6 +93,11 @@ export const constantRoutes: RouteRecordRaw[] = [
     path: '/day-matter',
     component: () => import('@/views/msg/msgDayMatter/dayMatter.vue'),
     hidden: true
+  },
+  {
+    path: '/rec-total',
+    component: () => import('@/views/rec/rec.vue'),
+    hidden: true
   }
 ];
 

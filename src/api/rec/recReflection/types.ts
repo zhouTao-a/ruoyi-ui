@@ -82,4 +82,9 @@ export interface RecReflectionQuery extends PageQuery {
    * 类型
    */
   sourceType?: string;
+
+  /**
+   * 是否随机
+   */
+  randomFlag?: boolean;
 }
