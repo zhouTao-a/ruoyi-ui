@@ -1,5 +1,4 @@
 <template>
-  <!-- 外层容器仅用于展示内容，触摸事件绑定到全局 -->
   <div class="tabs-container">
     <!-- 横向滑动 Tabs -->
     <div class="tabs-scroll-wrapper">
@@ -45,12 +44,70 @@
         </div>
       </transition>
 
-      <!-- 目标标签页（树形结构，支持展开/折叠） -->
+      <!-- 目标标签页（与任务样式一致） -->
       <transition name="tab-fade">
         <div v-show="activeTab === 'goals'" class="tab-pane goals-tab">
-          <div v-if="goalTree.length > 0" class="reports-list">
-            <!-- 递归渲染树形结构 -->
-            <GoalNode v-for="goal in goalTree" :key="goal.id" :goal="goal" :level="1" @toggle="handleGoalToggle" />
+          <div v-if="formattedGoals.length > 0" class="reports-list">
+            <!-- 目标列表项 - 与任务样式完全一致 -->
+            <div v-for="goal in formattedGoals" :key="goal.id" class="report-item">
+              <div class="report-header">
+                <!-- 有子目标时显示展开按钮 -->
+                <div v-if="goal.hasChildren" class="expand-control" @click.stop="toggleGoalDetails(goal.id)">
+                  <i class="expand-icon" :class="{ 'expanded': goal.showDetails }">
+                    {{ goal.showDetails ? '−' : '+' }}
+                  </i>
+                </div>
+
+                <div class="report-date">
+                  <span class="date-day">{{ goal.formattedDate.day || '∞' }}</span>
+                  <div class="date-month-year">
+                    <span>{{ goal.formattedDate.month || '无截止' }}</span>
+                    <span>{{ goal.formattedDate.year || '日期' }}</span>
+                  </div>
+                </div>
+
+                <div class="report-divider"></div>
+
+                <div class="task-status" :class="goal.statusClass">
+                  {{ goal.statusText }}
+                </div>
+              </div>
+
+              <div class="report-content">
+                <h3 class="report-summary">{{ goal.title }}</h3>
+                <div class="report-body">
+                  <p>{{ goal.content }}</p>
+                </div>
+              </div>
+
+              <!-- 子目标明细（仅在展开时显示） -->
+              <div v-if="goal.showDetails && goal.children && goal.children.length" class="goal-details">
+                <div class="subgoal-label">子目标 ({{ goal.children.length }})</div>
+                <div class="subgoals-list">
+                  <div v-for="subgoal in goal.children" :key="subgoal.id" class="subgoal-item">
+                    <div class="report-header">
+                      <div class="report-date">
+                        <span class="date-day">{{ subgoal.formattedDate.day || '∞' }}</span>
+                        <div class="date-month-year">
+                          <span>{{ subgoal.formattedDate.month || '无截止' }}</span>
+                          <span>{{ subgoal.formattedDate.year || '日期' }}</span>
+                        </div>
+                      </div>
+                      <div class="report-divider"></div>
+                      <div class="task-status" :class="subgoal.statusClass">
+                        {{ subgoal.statusText }}
+                      </div>
+                    </div>
+                    <div class="report-content">
+                      <h3 class="report-summary">{{ subgoal.title }}</h3>
+                      <div class="report-body">
+                        <p>{{ subgoal.content }}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
           <div v-else class="empty-state">暂无目标数据</div>
         </div>
@@ -61,7 +118,7 @@
         <div v-show="activeTab === 'tasks'" class="tab-pane tasks-tab">
           <div v-if="tasks.length > 0" class="reports-list">
             <!-- 任务列表项 -->
-            <div v-for="(task, index) in formatTasks(tasks)" :key="task.id" class="report-item">
+            <div v-for="task in formatTasks(tasks)" :key="task.id" class="report-item">
               <div class="report-header">
                 <div class="report-date">
                   <span class="date-day">{{ task.formattedDate.day }}</span>
@@ -71,14 +128,10 @@
                   </div>
                 </div>
                 <div class="report-divider"></div>
-
-                <!-- 任务状态：添加在日期右侧 -->
                 <div class="task-status" :class="task.statusClass">
                   {{ task.statusText }}
                 </div>
               </div>
-
-              <!-- 任务内容：与报告保持一致 -->
               <div class="report-content">
                 <h3 class="report-summary">{{ task.title }}</h3>
                 <div class="report-body">
@@ -96,8 +149,7 @@
         <div v-show="activeTab === 'reports'" class="tab-pane reports-tab">
           <div v-if="reports.length > 0" class="reports-list">
             <!-- 报告列表项 -->
-            <div v-for="(report, index) in formatReports(reports)" :key="report.id" class="report-item">
-              <!-- 报告头部：日期与装饰 -->
+            <div v-for="report in formatReports(reports)" :key="report.id" class="report-item">
               <div class="report-header">
                 <div class="report-date">
                   <span class="date-day">{{ report.formattedDate.day }}</span>
@@ -108,8 +160,6 @@
                 </div>
                 <div class="report-divider"></div>
               </div>
-
-              <!-- 报告内容 -->
               <div class="report-content">
                 <h3 class="report-summary">{{ report.summary }}</h3>
                 <div class="report-body">
@@ -126,7 +176,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, getCurrentInstance, toRefs, onMounted, watch, onUnmounted, defineComponent, h } from 'vue';
+import { ref, onMounted, watch, onUnmounted } from 'vue';
 import { listRecReflection } from '@/api/rec/recReflection';
 import { listRecReport } from '@/api/rec/recReport';
 import { listRecGoal } from '@/api/rec/recGoal';
@@ -136,139 +186,27 @@ import { RecReflectionVO } from '@/api/rec/recReflection/types';
 import { RecGoalVO } from '@/api/rec/recGoal/types';
 import { RecTaskVO } from '@/api/rec/recTask/types';
 
-// 修正接口定义 - 保持children为必填属性以匹配RecGoalVO
-interface GoalNode extends RecGoalVO {
+// 目标格式化接口
+interface FormattedGoal {
+  id: string | number;
+  title: string;
+  content: string;
+  status: string;
+  statusText: string;
+  statusClass: string;
+  deadLine: string | null;
   formattedDate: {
-    year: number;
+    year: string | number;
     month: string;
     day: string;
   };
-  isExpanded?: boolean; // 控制展开/折叠状态
+  hasDeadLine: boolean;
+  hasChildren: boolean;
+  children?: FormattedGoal[];
+  showDetails?: boolean;
 }
 
-// 类型断言函数
-function isGoalNode(node: any): node is GoalNode {
-  return 'formattedDate' in node && 'isExpanded' in node;
-}
-
-// 转换扁平目标数据为树形结构
-const formatGoalsToTree = (goals: RecGoalVO[]): GoalNode[] => {
-  const nodes = goals.map(
-    (goal) =>
-      ({
-        ...goal,
-        formattedDate: {
-          year: new Date(goal.deadLine).getFullYear(),
-          month: `${new Date(goal.deadLine).getMonth() + 1}月`,
-          day: new Date(goal.deadLine).getDate().toString()
-        },
-        isExpanded: false,
-        children: goal.children || []
-      }) as GoalNode
-  );
-
-  const nodeMap = new Map<string | number, GoalNode>();
-  nodes.forEach((node) => nodeMap.set(node.id, node));
-
-  const tree: GoalNode[] = [];
-  nodes.forEach((node) => {
-    if (!node.parentId) {
-      tree.push(node);
-    } else {
-      const parent = nodeMap.get(node.parentId);
-      if (parent) (parent.children as GoalNode[]).push(node);
-      else tree.push(node);
-    }
-  });
-  return tree;
-};
-
-// 定义目标节点组件（通过defineComponent实现）
-const GoalNode = defineComponent({
-  name: 'GoalNode',
-  props: {
-    goal: {
-      type: Object as () => GoalNode,
-      required: true
-    },
-    level: {
-      type: Number,
-      required: true
-    }
-  },
-  emits: ['toggle'],
-  render() {
-    const { goal, level } = this;
-    // 递归引用自身需要使用this.$options.components
-    const SelfComponent = this.$options.components?.GoalNode;
-
-    return h(
-      'div',
-      {
-        class: ['report-item', `level-${level}`]
-      },
-      [
-        // 目标头部
-        h(
-          'div',
-          {
-            class: 'report-header',
-            onClick: () => this.$emit('toggle', goal.id)
-          },
-          [
-            // 展开/折叠按钮
-            goal.children &&
-              goal.children.length &&
-              h('div', { class: 'expand-control' }, [
-                h(
-                  'i',
-                  {
-                    class: ['expand-icon', { 'expanded': goal.isExpanded }]
-                  },
-                  goal.isExpanded ? '−' : '+'
-                )
-              ]),
-            // 日期区域
-            h('div', { class: 'report-date' }, [
-              h('span', { class: 'date-day' }, goal.formattedDate.day),
-              h('div', { class: 'date-month-year' }, [h('span', goal.formattedDate.month), h('span', goal.formattedDate.year)])
-            ]),
-            h('div', { class: 'report-divider' }),
-            // 目标类型
-            h('div', { class: ['task-status', 'status-pending'] }, goal.parentId ? '子目标' : '主目标')
-          ]
-        ),
-        // 目标内容
-        h('div', { class: 'report-content' }, [
-          h('h3', { class: 'report-summary' }, goal.title),
-          h('div', { class: 'report-body' }, [
-            h('p', goal.content),
-            goal.parentId && h('p', { class: 'goal-parent-id' }, `父目标ID：${goal.parentId}`),
-            h('p', [h('strong', '进度：'), `${goal.progress}%`]),
-            h('p', [h('strong', '状态：'), goal.status])
-          ])
-        ]),
-        // 子目标容器
-        goal.isExpanded &&
-          goal.children &&
-          goal.children.length &&
-          h(
-            'div',
-            { class: 'children-container' },
-            goal.children.map((child: GoalNode) =>
-              h(SelfComponent, {
-                goal: child,
-                level: level + 1,
-                onToggle: (id: string | number) => this.$emit('toggle', id)
-              })
-            )
-          )
-      ]
-    );
-  }
-});
-
-// 类型定义和数据初始化
+// 标签配置
 const tabs = [
   { name: 'thoughts', label: '感想' },
   { name: 'goals', label: '目标' },
@@ -276,18 +214,72 @@ const tabs = [
   { name: 'reports', label: '报告' }
 ];
 
-const instance = getCurrentInstance();
-const proxy = instance?.proxy;
-const { source_type } = toRefs<any>(proxy?.useDict('source_type'));
-
+// 响应式数据
 const activeTab = ref('thoughts');
 const recReflection = ref<RecReflectionVO | null>(null);
 const reports = ref<RecReportVO[]>([]);
 const tasks = ref<RecTaskVO[]>([]);
 const goals = ref<RecGoalVO[]>([]);
-const goalTree = ref<GoalNode[]>([]);
+const formattedGoals = ref<FormattedGoal[]>([]);
+
+// 其他参数
 const recRefParams = ref({ pageNum: 1, pageSize: 1, randomFlag: true });
 const pageQueryParams = ref({ pageNum: 1, pageSize: 10 });
+
+// 格式化目标（与任务格式保持一致）
+const formatGoals = (goals: RecGoalVO[]): FormattedGoal[] => {
+  return goals.map((goal) => {
+    let formattedDate = { year: '', month: '', day: '' };
+    let hasDeadLine = false;
+
+    if (goal.deadLine) {
+      const date = new Date(goal.deadLine);
+      formattedDate = {
+        year: date.getFullYear(),
+        month: `${date.getMonth() + 1}月`,
+        day: date.getDate().toString()
+      };
+      hasDeadLine = true;
+    }
+
+    // 状态文本和样式映射（与任务保持一致）
+    let statusText = '';
+    let statusClass = '';
+
+    switch (goal.status) {
+      case 'completed':
+        statusText = '已完成';
+        statusClass = 'status-completed';
+        break;
+      case 'in_progress':
+        statusText = '进行中';
+        statusClass = 'status-in-progress';
+        break;
+      default:
+        statusText = '待处理';
+        statusClass = 'status-pending';
+    }
+
+    // 递归处理子目标
+    const hasChildren = goal.children && goal.children.length > 0;
+    const children = hasChildren ? formatGoals(goal.children) : undefined;
+
+    return {
+      id: goal.id,
+      title: goal.title,
+      content: goal.content,
+      status: goal.status,
+      statusText,
+      statusClass,
+      deadLine: goal.deadLine,
+      formattedDate,
+      hasDeadLine,
+      hasChildren,
+      children,
+      showDetails: false // 控制明细显示
+    };
+  });
+};
 
 // 格式化任务
 const formatTasks = (tasks: any[]) =>
@@ -321,19 +313,22 @@ const formatReports = (reports: any[]) =>
     }
   }));
 
-// 处理目标展开/折叠
-const handleGoalToggle = (goalId: string | number) => {
-  const toggleNode = (nodes: GoalNode[]) => {
-    for (const node of nodes) {
-      if (node.id === goalId) {
-        node.isExpanded = !node.isExpanded;
+// 切换目标明细显示
+const toggleGoalDetails = (goalId: string | number) => {
+  const toggleInArray = (goalsArray: FormattedGoal[]) => {
+    for (const goal of goalsArray) {
+      if (goal.id === goalId) {
+        goal.showDetails = !goal.showDetails;
         return true;
       }
-      if (toggleNode(node.children as GoalNode[])) return true;
+      if (goal.children && toggleInArray(goal.children)) {
+        return true;
+      }
     }
     return false;
   };
-  toggleNode(goalTree.value);
+
+  toggleInArray(formattedGoals.value);
 };
 
 // 数据获取函数
@@ -348,14 +343,43 @@ const getList = async () => {
 
 const getGoalList = async () => {
   try {
-    const res = await listRecGoal(pageQueryParams.value);
-    goals.value = res.rows || [];
-    goalTree.value = formatGoalsToTree(goals.value);
+    // 使用模拟数据
+    goals.value = convertToTree((await listRecGoal(pageQueryParams.value)).rows);
+    // 只展示顶级目标，子目标通过展开显示
+    formattedGoals.value = formatGoals(goals.value.filter((goal) => !goal.parentId || goal.parentId === 0));
   } catch (e) {
     goals.value = [];
-    goalTree.value = [];
+    formattedGoals.value = [];
   }
 };
+
+// 转换函数
+function convertToTree(flatData) {
+  const nodeMap = new Map();
+  const tree = [];
+
+  // 1. 将所有节点存入 Map
+  flatData.forEach((node) => {
+    nodeMap.set(node.id, { ...node, children: [] });
+  });
+
+  // 2. 构建树形结构
+  flatData.forEach((node) => {
+    const currentNode = nodeMap.get(node.id);
+    if (node.parentId === 0) {
+      // 顶级节点，直接加入结果数组
+      tree.push(currentNode);
+    } else {
+      // 非顶级节点，找到父节点并添加到其 children 数组
+      const parentNode = nodeMap.get(node.parentId);
+      if (parentNode) {
+        parentNode.children.push(currentNode);
+      }
+    }
+  });
+
+  return tree;
+}
 
 const getReportList = async () => {
   try {
@@ -383,7 +407,7 @@ getTaskList();
 
 // 监听目标数据变化
 watch(goals, (newGoals) => {
-  goalTree.value = formatGoalsToTree(newGoals);
+  formattedGoals.value = formatGoals(newGoals.filter((goal) => !goal.parentId || goal.parentId === 0));
 });
 
 // 滑动切换逻辑
@@ -471,7 +495,6 @@ watch(activeTab, scrollToActiveTab);
 
 // 组件生命周期
 onMounted(() => {
-  resetSwipeState();
   document.addEventListener('touchstart', handleGlobalTouchStart, { passive: false });
   document.addEventListener('touchmove', handleGlobalTouchMove, { passive: false });
   document.addEventListener('touchend', handleGlobalTouchEnd);
@@ -487,6 +510,7 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+/* 基础样式保持不变 */
 .tabs-container {
   width: 100%;
   max-width: 800px;
@@ -497,10 +521,10 @@ onUnmounted(() => {
   overflow: hidden;
 }
 
-/* 横向滑动 Tabs 优化 */
+/* 横向滑动 Tabs */
 .tabs-scroll-wrapper {
   overflow-x: auto;
-  scrollbar-width: none; /* 隐藏滚动条 */
+  scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
   background-color: #fff;
   position: sticky;
@@ -510,7 +534,7 @@ onUnmounted(() => {
 }
 
 .tabs-scroll-wrapper::-webkit-scrollbar {
-  display: none; /* 隐藏滚动条 */
+  display: none;
 }
 
 .tabs-scroll {
@@ -550,10 +574,9 @@ onUnmounted(() => {
   height: 3px;
   background-color: #409eff;
   border-radius: 3px 3px 0 0;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Tab 内容区域优化 */
+/* Tab 内容区域 */
 .tab-content {
   overflow: hidden;
   padding: 16px;
@@ -579,275 +602,37 @@ onUnmounted(() => {
   transform: translateX(20px);
 }
 
-.tab-fade-enter-to,
-.tab-fade-leave-from {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-/* 感想卡片优化 */
-.thought-card {
-  border: 1px solid #f0f0f0;
-  border-radius: 12px;
-  padding: 20px;
-  margin-top: 8px;
-  background: #fff;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-.thought-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-}
-
-.thought-title {
-  font-size: 19px;
-  font-weight: 600;
-  margin-bottom: 12px;
-  color: #303133;
-  line-height: 1.4;
-}
-
-.thought-synopsis,
-.thought-content,
-.thought-source {
-  margin-bottom: 10px;
-  line-height: 1.7;
-  color: #606266;
-  font-size: 15px;
-}
-
-.thought-synopsis strong,
-.thought-content strong,
-.thought-source strong {
-  color: #303133;
-  margin-right: 8px;
-}
-
-.thought-link {
-  display: inline-block;
-  margin-top: 8px;
-  color: #409eff;
-  text-decoration: none;
-  font-size: 14px;
-  transition: color 0.2s ease;
-}
-
-.thought-link:hover {
-  color: #66b1ff;
-  text-decoration: underline;
-}
-
-/* 按钮样式优化 */
-.button-container {
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
-}
-
-.refresh-btn {
-  width: 100%;
-  max-width: 300px;
-  padding: 12px 0;
-  background-color: #409eff;
-  color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
-  cursor: pointer;
-  font-size: 16px;
-  font-weight: 500;
-  transition: all 0.25s ease;
-  border: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-.refresh-btn.small {
-  max-width: 160px;
-  padding: 8px 0;
-  font-size: 14px;
-}
-
-.refresh-btn:hover {
-  background-color: #66b1ff;
-  box-shadow: 0 6px 16px rgba(64, 158, 255, 0.4);
-  transform: translateY(-1px);
-}
-
-.refresh-btn:active {
-  transform: translateY(1px);
-  box-shadow: 0 2px 8px rgba(64, 158, 255, 0.3);
-}
-
-/* 空状态样式 */
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 200px;
-  color: #909399;
-  font-size: 16px;
-  padding: 20px;
-  text-align: center;
-}
-
-.empty-state p {
-  margin-bottom: 16px;
-}
-
-/* 报告、任务、目标通用样式 */
-.reports-tab,
-.goals-tab,
-.tasks-tab {
-  padding: 16px;
-}
-
+/* 目标和任务通用样式 */
 .reports-list {
   display: flex;
   flex-direction: column;
-  gap: 20px; /* 列表项间距 */
+  gap: 12px;
 }
 
 .report-item {
-  border-radius: 12px;
+  border-radius: 8px;
   background-color: #fff;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   overflow: hidden;
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .report-item:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
+/* 目标/任务头部 */
 .report-header {
   display: flex;
   align-items: center;
   padding: 12px 16px;
   background-color: #f5f7fa;
   border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
 }
 
-.report-date {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.date-day {
-  font-size: 28px;
-  font-weight: 700;
-  color: #409eff;
-  line-height: 1;
-}
-
-.date-month-year {
-  display: flex;
-  flex-direction: column;
-  color: #606266;
-}
-
-.date-month-year span:first-child {
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.date-month-year span:last-child {
-  font-size: 12px;
-  opacity: 0.8;
-}
-
-.report-divider {
-  flex: 1;
-  height: 1px;
-  background-color: #e0e0e0;
-  margin-left: 16px;
-}
-
-.report-content {
-  padding: 16px;
-}
-
-.report-summary {
-  font-size: 17px;
-  font-weight: 600;
-  color: #303133;
-  margin-bottom: 12px;
-  line-height: 1.4;
-}
-
-.report-body {
-  color: #606266;
-  line-height: 1.8;
-  font-size: 15px;
-  padding-left: 4px;
-  border-left: 2px solid #e0e0e0;
-}
-
-.reports-tab .empty-state,
-.goals-tab .empty-state,
-.tasks-tab .empty-state {
-  min-height: 300px;
-}
-
-/* 任务状态样式 */
-.task-status {
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 500;
-  margin-left: 16px;
-  white-space: nowrap; /* 确保状态文字不换行 */
-}
-
-.status-pending {
-  background-color: #e9ecef;
-  color: #495057;
-}
-
-.status-in-progress {
-  background-color: #cce5ff;
-  color: #004085;
-}
-
-.status-completed {
-  background-color: #d4edda;
-  color: #155724;
-}
-
-.status-overdue {
-  background-color: #f8d7da;
-  color: #721c24;
-}
-
-/* 目标树形结构特有样式 */
-/* 目标节点层级样式 */
-.level-1 {
-  border-left: 3px solid #409eff;
-}
-.level-2 {
-  border-left: 3px solid #67c23a;
-  margin-left: 24px;
-}
-.level-3 {
-  border-left: 3px solid #e6a23c;
-  margin-left: 48px;
-}
-.level-4 {
-  border-left: 3px solid #f56c6c;
-  margin-left: 72px;
-}
-
-/* 展开/折叠控制 */
+/* 展开/折叠按钮 */
 .expand-control {
   display: flex;
   align-items: center;
@@ -875,23 +660,185 @@ onUnmounted(() => {
   transform: rotate(180deg);
 }
 
-/* 子目标容器 */
-.children-container {
-  overflow: hidden;
-  transition: max-height 0.3s ease;
+/* 日期样式 */
+.report-date {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-/* 报告头部点击区域优化 */
-.report-header {
-  cursor: pointer;
+.date-day {
+  font-size: 24px;
+  font-weight: 700;
+  color: #409eff;
+  line-height: 1;
 }
 
-/* 父目标ID样式调整 */
-.goal-parent-id {
-  margin-top: 8px;
-  font-size: 14px;
+.date-day.no-deadline {
   color: #909399;
+  font-size: 20px;
+}
+
+.date-month-year {
+  display: flex;
+  flex-direction: column;
+  color: #606266;
+}
+
+.date-month-year span:first-child {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.date-month-year span:last-child {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.report-divider {
+  flex: 1;
+  height: 1px;
+  background-color: #e0e0e0;
+  margin-left: 16px;
+}
+
+/* 内容样式 */
+.report-content {
+  padding: 16px;
+}
+
+.report-summary {
+  font-size: 16px;
+  font-weight: 600;
+  color: #303133;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+.report-body {
+  color: #606266;
+  line-height: 1.6;
+  font-size: 14px;
   padding-left: 4px;
+  border-left: 2px solid #e0e0e0;
+}
+
+/* 目标明细样式 */
+.goal-details {
+  border-top: 1px dashed #e0e0e0;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.subgoal-label {
+  padding: 8px 16px;
+  font-size: 13px;
+  color: #409eff;
+  background-color: #f0f7ff;
+  border-bottom: 1px solid #e6f7ff;
+}
+
+.subgoals-list {
+  padding: 8px;
+  background-color: #fafafa;
+}
+
+.subgoal-item {
+  border-radius: 6px;
+  background-color: #fff;
+  margin-bottom: 8px;
+  border: 1px solid #f0f0f0;
+}
+
+.subgoal-item:last-child {
+  margin-bottom: 0;
+}
+
+/* 状态标签样式 */
+.task-status {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  margin-left: 16px;
+  white-space: nowrap;
+}
+
+.status-pending {
+  background-color: #e9ecef;
+  color: #495057;
+}
+
+.status-in-progress {
+  background-color: #cce5ff;
+  color: #004085;
+}
+
+.status-completed {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-overdue {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+/* 其他样式保持不变 */
+.thought-card {
+  border: 1px solid #f0f0f0;
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 8px;
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+.thought-title {
+  font-size: 19px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #303133;
+}
+
+.thought-synopsis,
+.thought-content,
+.thought-source {
+  margin-bottom: 10px;
+  line-height: 1.7;
+  color: #606266;
+  font-size: 15px;
+}
+
+.button-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.refresh-btn {
+  width: 100%;
+  max-width: 300px;
+  padding: 12px 0;
+  background-color: #409eff;
+  color: #fff;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  color: #909399;
+  font-size: 16px;
+  padding: 20px;
+  text-align: center;
 }
 
 /* 响应式调整 */
@@ -899,28 +846,6 @@ onUnmounted(() => {
   .tab-item {
     padding: 14px 18px;
     font-size: 15px;
-  }
-
-  .thought-card {
-    padding: 16px;
-  }
-
-  .thought-title {
-    font-size: 18px;
-  }
-
-  .tab-content {
-    padding: 12px;
-  }
-
-  .level-2 {
-    margin-left: 16px;
-  }
-  .level-3 {
-    margin-left: 32px;
-  }
-  .level-4 {
-    margin-left: 48px;
   }
 }
 
@@ -930,22 +855,8 @@ onUnmounted(() => {
     font-size: 14px;
   }
 
-  .refresh-btn {
-    font-size: 15px;
-  }
-
   .date-day {
-    font-size: 24px;
-  }
-
-  .level-2 {
-    margin-left: 12px;
-  }
-  .level-3 {
-    margin-left: 24px;
-  }
-  .level-4 {
-    margin-left: 36px;
+    font-size: 20px;
   }
 }
 </style>
