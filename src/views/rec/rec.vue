@@ -44,21 +44,20 @@
         </div>
       </transition>
 
-      <!-- 目标标签页（与任务样式一致） -->
+      <!-- 目标标签页（日期区域加专属类：date-goal） -->
       <transition name="tab-fade">
         <div v-show="activeTab === 'goals'" class="tab-pane goals-tab">
           <div v-if="formattedGoals.length > 0" class="reports-list">
-            <!-- 目标列表项 - 与任务样式完全一致 -->
             <div v-for="goal in formattedGoals" :key="goal.id" class="report-item">
               <div class="report-header">
-                <!-- 有子目标时显示展开按钮 -->
                 <div v-if="goal.hasChildren" class="expand-control" @click.stop="toggleGoalDetails(goal.id)">
                   <i class="expand-icon" :class="{ 'expanded': goal.showDetails }">
                     {{ goal.showDetails ? '−' : '+' }}
                   </i>
                 </div>
 
-                <div class="report-date">
+                <!-- 目标日期区域：添加 date-goal 类 -->
+                <div class="report-date date-goal">
                   <span class="date-day">{{ goal.formattedDate.day || '∞' }}</span>
                   <div class="date-month-year">
                     <span>{{ goal.formattedDate.month || '无截止' }}</span>
@@ -67,7 +66,6 @@
                 </div>
 
                 <div class="report-divider"></div>
-
                 <div class="task-status" :class="goal.statusClass">
                   {{ goal.statusText }}
                 </div>
@@ -80,13 +78,13 @@
                 </div>
               </div>
 
-              <!-- 子目标明细（仅在展开时显示） -->
+              <!-- 子目标明细（子目标日期也加 date-goal） -->
               <div v-if="goal.showDetails && goal.children && goal.children.length" class="goal-details">
                 <div class="subgoal-label">子目标 ({{ goal.children.length }})</div>
                 <div class="subgoals-list">
                   <div v-for="subgoal in goal.children" :key="subgoal.id" class="subgoal-item">
                     <div class="report-header">
-                      <div class="report-date">
+                      <div class="report-date date-goal">
                         <span class="date-day">{{ subgoal.formattedDate.day || '∞' }}</span>
                         <div class="date-month-year">
                           <span>{{ subgoal.formattedDate.month || '无截止' }}</span>
@@ -113,20 +111,21 @@
         </div>
       </transition>
 
-      <!-- 任务标签页 -->
+      <!-- 任务标签页（日期区域加专属类：date-task） -->
       <transition name="tab-fade">
         <div v-show="activeTab === 'tasks'" class="tab-pane tasks-tab">
           <div v-if="tasks.length > 0" class="reports-list">
-            <!-- 任务列表项 -->
             <div v-for="task in formatTasks(tasks)" :key="task.id" class="report-item">
               <div class="report-header">
-                <div class="report-date">
+                <!-- 任务日期区域：添加 date-task 类 -->
+                <div class="report-date date-task">
                   <span class="date-day">{{ task.formattedDate.day }}</span>
                   <div class="date-month-year">
                     <span>{{ task.formattedDate.month }}</span>
                     <span>{{ task.formattedDate.year }}</span>
                   </div>
                 </div>
+
                 <div class="report-divider"></div>
                 <div class="task-status" :class="task.statusClass">
                   {{ task.statusText }}
@@ -144,20 +143,21 @@
         </div>
       </transition>
 
-      <!-- 报告标签页 -->
+      <!-- 报告标签页（日期区域加专属类：date-report） -->
       <transition name="tab-fade">
         <div v-show="activeTab === 'reports'" class="tab-pane reports-tab">
           <div v-if="reports.length > 0" class="reports-list">
-            <!-- 报告列表项 -->
             <div v-for="report in formatReports(reports)" :key="report.id" class="report-item">
               <div class="report-header">
-                <div class="report-date">
+                <!-- 报告日期区域：添加 date-report 类 -->
+                <div class="report-date date-report">
                   <span class="date-day">{{ report.formattedDate.day }}</span>
                   <div class="date-month-year">
                     <span>{{ report.formattedDate.month }}</span>
                     <span>{{ report.formattedDate.year }}</span>
                   </div>
                 </div>
+
                 <div class="report-divider"></div>
               </div>
               <div class="report-content">
@@ -176,6 +176,7 @@
 </template>
 
 <script setup lang="ts">
+// 脚本部分无修改，保持原逻辑
 import { ref, onMounted, watch, onUnmounted } from 'vue';
 import { listRecReflection } from '@/api/rec/recReflection';
 import { listRecReport } from '@/api/rec/recReport';
@@ -186,7 +187,6 @@ import { RecReflectionVO } from '@/api/rec/recReflection/types';
 import { RecGoalVO } from '@/api/rec/recGoal/types';
 import { RecTaskVO } from '@/api/rec/recTask/types';
 
-// 目标格式化接口
 interface FormattedGoal {
   id: string | number;
   title: string;
@@ -206,7 +206,6 @@ interface FormattedGoal {
   showDetails?: boolean;
 }
 
-// 标签配置
 const tabs = [
   { name: 'thoughts', label: '感想' },
   { name: 'goals', label: '目标' },
@@ -214,7 +213,6 @@ const tabs = [
   { name: 'reports', label: '报告' }
 ];
 
-// 响应式数据
 const activeTab = ref('thoughts');
 const recReflection = ref<RecReflectionVO | null>(null);
 const reports = ref<RecReportVO[]>([]);
@@ -222,45 +220,45 @@ const tasks = ref<RecTaskVO[]>([]);
 const goals = ref<RecGoalVO[]>([]);
 const formattedGoals = ref<FormattedGoal[]>([]);
 
-// 其他参数
 const recRefParams = ref({ pageNum: 1, pageSize: 1, randomFlag: true });
 const pageQueryParams = ref({ pageNum: 1, pageSize: 10 });
 
-// 格式化目标（与任务格式保持一致）
 const formatGoals = (goals: RecGoalVO[]): FormattedGoal[] => {
   return goals.map((goal) => {
     let formattedDate = { year: '', month: '', day: '' };
     let hasDeadLine = false;
-
-    if (goal.deadLine) {
-      const date = new Date(goal.deadLine);
-      formattedDate = {
-        year: date.getFullYear(),
-        month: `${date.getMonth() + 1}月`,
-        day: date.getDate().toString()
-      };
-      hasDeadLine = true;
-    }
-
-    // 状态文本和样式映射（与任务保持一致）
     let statusText = '';
     let statusClass = '';
 
-    switch (goal.status) {
-      case 'completed':
+    if (goal.deadLine) {
+      const deadlineDate = new Date(goal.deadLine);
+      const currentDate = new Date();
+
+      formattedDate = {
+        year: deadlineDate.getFullYear().toString(),
+        month: `${deadlineDate.getMonth() + 1}月`,
+        day: deadlineDate.getDate().toString()
+      };
+      hasDeadLine = true;
+
+      if (goal.status === 'completed') {
         statusText = '已完成';
         statusClass = 'status-completed';
-        break;
-      case 'in_progress':
+      } else if (deadlineDate < currentDate) {
+        statusText = '已逾期';
+        statusClass = 'status-overdue';
+      } else if (goal.status === 'in_progress') {
         statusText = '进行中';
         statusClass = 'status-in-progress';
-        break;
-      default:
+      } else {
         statusText = '待处理';
         statusClass = 'status-pending';
+      }
+    } else {
+      statusText = '无截止日期';
+      statusClass = 'status-no-deadline';
     }
 
-    // 递归处理子目标
     const hasChildren = goal.children && goal.children.length > 0;
     const children = hasChildren ? formatGoals(goal.children) : undefined;
 
@@ -276,12 +274,11 @@ const formatGoals = (goals: RecGoalVO[]): FormattedGoal[] => {
       hasDeadLine,
       hasChildren,
       children,
-      showDetails: false // 控制明细显示
+      showDetails: false
     };
   });
 };
 
-// 格式化任务
 const formatTasks = (tasks: any[]) =>
   tasks.map((task) => ({
     ...task,
@@ -302,7 +299,6 @@ const formatTasks = (tasks: any[]) =>
             : 'status-pending'
   }));
 
-// 格式化报告
 const formatReports = (reports: any[]) =>
   reports.map((report) => ({
     ...report,
@@ -313,7 +309,6 @@ const formatReports = (reports: any[]) =>
     }
   }));
 
-// 切换目标明细显示
 const toggleGoalDetails = (goalId: string | number) => {
   const toggleInArray = (goalsArray: FormattedGoal[]) => {
     for (const goal of goalsArray) {
@@ -327,11 +322,9 @@ const toggleGoalDetails = (goalId: string | number) => {
     }
     return false;
   };
-
   toggleInArray(formattedGoals.value);
 };
 
-// 数据获取函数
 const getList = async () => {
   try {
     const res = await listRecReflection(recRefParams.value);
@@ -343,9 +336,8 @@ const getList = async () => {
 
 const getGoalList = async () => {
   try {
-    // 使用模拟数据
-    goals.value = convertToTree((await listRecGoal(pageQueryParams.value)).rows);
-    // 只展示顶级目标，子目标通过展开显示
+    const res = await listRecGoal(pageQueryParams.value);
+    goals.value = convertToTree(res.rows);
     formattedGoals.value = formatGoals(goals.value.filter((goal) => !goal.parentId || goal.parentId === 0));
   } catch (e) {
     goals.value = [];
@@ -353,31 +345,23 @@ const getGoalList = async () => {
   }
 };
 
-// 转换函数
-function convertToTree(flatData) {
+function convertToTree(flatData: RecGoalVO[]) {
   const nodeMap = new Map();
-  const tree = [];
-
-  // 1. 将所有节点存入 Map
+  const tree: RecGoalVO[] = [];
   flatData.forEach((node) => {
     nodeMap.set(node.id, { ...node, children: [] });
   });
-
-  // 2. 构建树形结构
   flatData.forEach((node) => {
     const currentNode = nodeMap.get(node.id);
     if (node.parentId === 0) {
-      // 顶级节点，直接加入结果数组
       tree.push(currentNode);
     } else {
-      // 非顶级节点，找到父节点并添加到其 children 数组
       const parentNode = nodeMap.get(node.parentId);
       if (parentNode) {
         parentNode.children.push(currentNode);
       }
     }
   });
-
   return tree;
 }
 
@@ -399,18 +383,15 @@ const getTaskList = async () => {
   }
 };
 
-// 初始化数据
 getList();
 getReportList();
 getGoalList();
 getTaskList();
 
-// 监听目标数据变化
 watch(goals, (newGoals) => {
   formattedGoals.value = formatGoals(newGoals.filter((goal) => !goal.parentId || goal.parentId === 0));
 });
 
-// 滑动切换逻辑
 let startX = 0,
   startY = 0,
   endX = 0,
@@ -440,12 +421,10 @@ const handleGlobalTouchEnd = () => {
   const deltaX = endX - startX,
     deltaY = endY - startY;
   const currentIndex = tabs.findIndex((tab) => tab.name === activeTab.value);
-
   if (Math.abs(deltaY) > VERTICAL_SWIPE_THRESHOLD || Math.abs(deltaX) <= CLICK_THRESHOLD) {
     resetSwipeState();
     return;
   }
-
   const isFastSwipe = Math.abs(deltaX) / (Date.now() - startTime) > 0.5;
   if (Math.abs(deltaX) > SWIPE_THRESHOLD || isFastSwipe) {
     if (deltaX < 0 && currentIndex < tabs.length - 1) {
@@ -463,12 +442,10 @@ const resetSwipeState = () => {
   isSwiping = false;
 };
 
-// Tab点击事件
 const handleTabClick = (tabName: string) => {
   activeTab.value = tabName;
 };
 
-// 阻止Tab触摸事件冒泡
 const onTabTouchStart = (e: TouchEvent) => {
   e.stopPropagation();
   isSwiping = false;
@@ -478,22 +455,18 @@ const onTabTouchEnd = (e: TouchEvent) => {
   e.stopPropagation();
 };
 
-// 滚动到激活的Tab
 const scrollToActiveTab = () => {
   const activeElement = document.querySelector('.tab-item.active');
   const wrapper = document.querySelector('.tabs-scroll-wrapper');
   if (!activeElement || !wrapper) return;
-
   const wrapperRect = wrapper.getBoundingClientRect();
   const tabRect = activeElement.getBoundingClientRect();
   const scrollPosition = tabRect.left - wrapperRect.left + wrapper.scrollLeft - (wrapperRect.width / 2 - tabRect.width / 2);
-
   wrapper.scrollTo({ left: scrollPosition, behavior: 'smooth' });
 };
 
 watch(activeTab, scrollToActiveTab);
 
-// 组件生命周期
 onMounted(() => {
   document.addEventListener('touchstart', handleGlobalTouchStart, { passive: false });
   document.addEventListener('touchmove', handleGlobalTouchMove, { passive: false });
@@ -521,7 +494,6 @@ onUnmounted(() => {
   overflow: hidden;
 }
 
-/* 横向滑动 Tabs */
 .tabs-scroll-wrapper {
   overflow-x: auto;
   scrollbar-width: none;
@@ -576,7 +548,6 @@ onUnmounted(() => {
   border-radius: 3px 3px 0 0;
 }
 
-/* Tab 内容区域 */
 .tab-content {
   overflow: hidden;
   padding: 16px;
@@ -588,7 +559,6 @@ onUnmounted(() => {
   transition: all 0.3s ease;
 }
 
-/* 内容切换动画 */
 .tab-fade-enter-active,
 .tab-fade-leave-active {
   transition:
@@ -602,7 +572,6 @@ onUnmounted(() => {
   transform: translateX(20px);
 }
 
-/* 目标和任务通用样式 */
 .reports-list {
   display: flex;
   flex-direction: column;
@@ -622,7 +591,6 @@ onUnmounted(() => {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-/* 目标/任务头部 */
 .report-header {
   display: flex;
   align-items: center;
@@ -632,7 +600,6 @@ onUnmounted(() => {
   cursor: pointer;
 }
 
-/* 展开/折叠按钮 */
 .expand-control {
   display: flex;
   align-items: center;
@@ -660,29 +627,24 @@ onUnmounted(() => {
   transform: rotate(180deg);
 }
 
-/* 日期样式 */
+/* 1. 日期区域基础样式（保留通用布局） */
 .report-date {
   display: flex;
   align-items: center;
   gap: 10px;
+  padding: 6px 12px; /* 增加内边距，让背景色更明显 */
+  border-radius: 8px; /* 加圆角，提升美观度 */
 }
 
 .date-day {
   font-size: 24px;
   font-weight: 700;
-  color: #409eff;
   line-height: 1;
-}
-
-.date-day.no-deadline {
-  color: #909399;
-  font-size: 20px;
 }
 
 .date-month-year {
   display: flex;
   flex-direction: column;
-  color: #606266;
 }
 
 .date-month-year span:first-child {
@@ -695,6 +657,47 @@ onUnmounted(() => {
   opacity: 0.8;
 }
 
+/* 2. 目标日期专属样式（淡蓝色） */
+.date-goal {
+  background-color: rgba(64, 158, 255, 0.1); /* 淡蓝背景 */
+}
+.date-goal .date-day {
+  color: #409eff; /* 蓝色日期 */
+}
+.date-goal .date-month-year {
+  color: #004085; /* 深蓝色文字 */
+}
+
+/* 3. 任务日期专属样式（淡绿色） */
+.date-task {
+  background-color: rgba(103, 194, 58, 0.1); /* 淡绿背景 */
+}
+.date-task .date-day {
+  color: #67c23a; /* 绿色日期 */
+}
+.date-task .date-month-year {
+  color: #155724; /* 深绿色文字 */
+}
+
+/* 4. 报告日期专属样式（淡橙色） */
+.date-report {
+  background-color: rgba(230, 162, 60, 0.1); /* 淡橙背景 */
+}
+.date-report .date-day {
+  color: #e6a23c; /* 橙色日期 */
+}
+.date-report .date-month-year {
+  color: #856404; /* 深橙色文字 */
+}
+
+/* 无截止日期样式补充 */
+.date-goal .date-day.no-deadline,
+.date-task .date-day.no-deadline,
+.date-report .date-day.no-deadline {
+  color: #909399;
+  font-size: 20px;
+}
+
 .report-divider {
   flex: 1;
   height: 1px;
@@ -702,7 +705,6 @@ onUnmounted(() => {
   margin-left: 16px;
 }
 
-/* 内容样式 */
 .report-content {
   padding: 16px;
 }
@@ -723,7 +725,6 @@ onUnmounted(() => {
   border-left: 2px solid #e0e0e0;
 }
 
-/* 目标明细样式 */
 .goal-details {
   border-top: 1px dashed #e0e0e0;
   overflow: hidden;
@@ -754,7 +755,6 @@ onUnmounted(() => {
   margin-bottom: 0;
 }
 
-/* 状态标签样式 */
 .task-status {
   padding: 4px 12px;
   border-radius: 20px;
@@ -784,7 +784,11 @@ onUnmounted(() => {
   color: #721c24;
 }
 
-/* 其他样式保持不变 */
+.status-no-deadline {
+  background-color: #f0f2f5;
+  color: #606266;
+}
+
 .thought-card {
   border: 1px solid #f0f0f0;
   border-radius: 12px;
@@ -841,11 +845,13 @@ onUnmounted(() => {
   text-align: center;
 }
 
-/* 响应式调整 */
 @media (max-width: 768px) {
   .tab-item {
     padding: 14px 18px;
     font-size: 15px;
+  }
+  .report-date {
+    padding: 4px 8px; /* 小屏幕缩小内边距 */
   }
 }
 
@@ -854,9 +860,11 @@ onUnmounted(() => {
     padding: 12px 14px;
     font-size: 14px;
   }
-
   .date-day {
     font-size: 20px;
+  }
+  .report-date {
+    gap: 6px; /* 小屏幕缩小间距 */
   }
 }
 </style>
