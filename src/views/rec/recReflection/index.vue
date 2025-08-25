@@ -157,8 +157,7 @@ const data = reactive<PageData<RecReflectionForm, RecReflectionQuery>>({
     sourceType: undefined
   },
   rules: {
-    title: [{ required: true, message: '标题不能为空', trigger: 'blur' }],
-    content: [{ required: true, message: '感想不能为空', trigger: 'blur' }]
+    title: [{ required: true, message: '标题不能为空', trigger: 'blur' }]
   }
 });
 

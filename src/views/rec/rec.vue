@@ -26,10 +26,7 @@
             <h3 class="thought-title">{{ recReflection.title }}</h3>
             <p v-if="recReflection.synopsis" class="thought-synopsis"><strong>概要:</strong> {{ recReflection.synopsis }}</p>
             <p v-if="recReflection.content" class="thought-content"><strong>感想:</strong> {{ recReflection.content }}</p>
-            <p v-if="recReflection.sourceName" class="thought-source">
-              <strong>来源:</strong> {{ recReflection.sourceName }}
-              <span v-if="recReflection.sourceType"> — {{ recReflection.sourceType }} </span>
-            </p>
+            <p v-if="recReflection.sourceName" class="thought-source"><strong>来源:</strong> {{ recReflection.sourceName }}</p>
             <a v-if="recReflection.sourceLink" :href="recReflection.sourceLink" class="thought-link" target="_blank">
               <strong>链接:</strong> {{ recReflection.sourceLink }}
             </a>
