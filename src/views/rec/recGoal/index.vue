@@ -111,7 +111,7 @@
           <el-input ref="titleInputRef" v-model="form.title" placeholder="请输入标题" :disabled="isDetailView" />
         </el-form-item>
         <el-form-item label="内容" prop="content">
-          <el-input v-model="form.content" type="textarea" placeholder="请输入内容" :disabled="isDetailView" />
+          <el-input v-model="form.content" type="textarea" :rows="6" placeholder="请输入内容" :disabled="isDetailView" />
         </el-form-item>
         <el-form-item label="进度" prop="progress">
           <el-input-number

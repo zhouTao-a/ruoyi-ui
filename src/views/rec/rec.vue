@@ -78,12 +78,21 @@
                 </div>
               </div>
 
-              <!-- 子目标明细（子目标日期也加 date-goal） -->
+              <!-- 子目标明细（原二级子目标，现在支持渲染三级） -->
               <div v-if="goal.showDetails && goal.children && goal.children.length" class="goal-details">
                 <div class="subgoal-label">子目标 ({{ goal.children.length }})</div>
                 <div class="subgoals-list">
+                  <!-- 二级子目标（原逻辑），现在新增展开控制和三级目标渲染 -->
                   <div v-for="subgoal in goal.children" :key="subgoal.id" class="subgoal-item">
                     <div class="report-header">
+                      <!-- 新增：三级目标的展开/折叠控制（和根目标逻辑一致） -->
+                      <div v-if="subgoal.hasChildren" class="expand-control" @click.stop="toggleGoalDetails(subgoal.id)">
+                        <i class="expand-icon" :class="{ 'expanded': subgoal.showDetails }">
+                          {{ subgoal.showDetails ? '−' : '+' }}
+                        </i>
+                      </div>
+
+                      <!-- 二级子目标日期（不变） -->
                       <div class="report-date date-goal">
                         <span class="date-day">{{ subgoal.formattedDate.day || '∞' }}</span>
                         <div class="date-month-year">
@@ -91,15 +100,143 @@
                           <span>{{ subgoal.formattedDate.year || '日期' }}</span>
                         </div>
                       </div>
+
                       <div class="report-divider"></div>
                       <div class="task-status" :class="subgoal.statusClass">
                         {{ subgoal.statusText }}
                       </div>
                     </div>
+
+                    <!-- 二级子目标内容（不变） -->
                     <div class="report-content">
                       <h3 class="report-summary">{{ subgoal.title }}</h3>
                       <div class="report-body">
                         <p>{{ subgoal.content }}</p>
+                      </div>
+                    </div>
+
+                    <!-- 新增：三级目标渲染区域（含四级目标扩展） -->
+                    <div v-if="subgoal.showDetails && subgoal.children && subgoal.children.length" class="subgoal-details">
+                      <div class="subgoal-label">子目标 ({{ subgoal.children.length }})</div>
+                      <div class="subgoals-list">
+                        <!-- 三级目标 -->
+                        <div v-for="thirdGoal in subgoal.children" :key="thirdGoal.id" class="subgoal-item third-goal-item">
+                          <div class="report-header">
+                            <!-- 四级目标的展开/折叠控制 -->
+                            <div v-if="thirdGoal.hasChildren" class="expand-control" @click.stop="toggleGoalDetails(thirdGoal.id)">
+                              <i class="expand-icon" :class="{ 'expanded': thirdGoal.showDetails }">
+                                {{ thirdGoal.showDetails ? '−' : '+' }}
+                              </i>
+                            </div>
+
+                            <!-- 三级目标日期 -->
+                            <div class="report-date date-goal">
+                              <span class="date-day">{{ thirdGoal.formattedDate.day || '∞' }}</span>
+                              <div class="date-month-year">
+                                <span>{{ thirdGoal.formattedDate.month || '无截止' }}</span>
+                                <span>{{ thirdGoal.formattedDate.year || '日期' }}</span>
+                              </div>
+                            </div>
+
+                            <div class="report-divider"></div>
+                            <div class="task-status" :class="thirdGoal.statusClass">
+                              {{ thirdGoal.statusText }}
+                            </div>
+                          </div>
+
+                          <!-- 三级目标内容 -->
+                          <div class="report-content">
+                            <h3 class="report-summary">{{ thirdGoal.title }}</h3>
+                            <div class="report-body">
+                              <p>{{ thirdGoal.content }}</p>
+                            </div>
+                          </div>
+
+                          <!-- 新增：四级目标渲染区域（含五级目标扩展） -->
+                          <div v-if="thirdGoal.showDetails && thirdGoal.children && thirdGoal.children.length" class="subgoal-details">
+                            <div class="subgoal-label">子目标 ({{ thirdGoal.children.length }})</div>
+                            <div class="subgoals-list">
+                              <!-- 四级目标 -->
+                              <div v-for="fourthGoal in thirdGoal.children" :key="fourthGoal.id" class="subgoal-item fourth-goal-item">
+                                <div class="report-header">
+                                  <!-- 五级目标的展开/折叠控制 -->
+                                  <div v-if="fourthGoal.hasChildren" class="expand-control" @click.stop="toggleGoalDetails(fourthGoal.id)">
+                                    <i class="expand-icon" :class="{ 'expanded': fourthGoal.showDetails }">
+                                      {{ fourthGoal.showDetails ? '−' : '+' }}
+                                    </i>
+                                  </div>
+
+                                  <!-- 四级目标日期 -->
+                                  <div class="report-date date-goal">
+                                    <span class="date-day">{{ fourthGoal.formattedDate.day || '∞' }}</span>
+                                    <div class="date-month-year">
+                                      <span>{{ fourthGoal.formattedDate.month || '无截止' }}</span>
+                                      <span>{{ fourthGoal.formattedDate.year || '日期' }}</span>
+                                    </div>
+                                  </div>
+
+                                  <div class="report-divider"></div>
+                                  <div class="task-status" :class="fourthGoal.statusClass">
+                                    {{ fourthGoal.statusText }}
+                                  </div>
+                                </div>
+
+                                <!-- 四级目标内容 -->
+                                <div class="report-content">
+                                  <h3 class="report-summary">{{ fourthGoal.title }}</h3>
+                                  <div class="report-body">
+                                    <p>{{ fourthGoal.content }}</p>
+                                  </div>
+                                </div>
+
+                                <!-- 新增：五级目标渲染区域 -->
+                                <div v-if="fourthGoal.showDetails && fourthGoal.children && fourthGoal.children.length" class="subgoal-details">
+                                  <div class="subgoal-label">子目标 ({{ fourthGoal.children.length }})</div>
+                                  <div class="subgoals-list">
+                                    <!-- 五级目标 -->
+                                    <div v-for="fifthGoal in fourthGoal.children" :key="fifthGoal.id" class="subgoal-item fifth-goal-item">
+                                      <div class="report-header">
+                                        <!-- 可选：六级目标的展开控制（如需支持，复制此段即可） -->
+                                        <div v-if="fifthGoal.hasChildren" class="expand-control" @click.stop="toggleGoalDetails(fifthGoal.id)">
+                                          <i class="expand-icon" :class="{ 'expanded': fifthGoal.showDetails }">
+                                            {{ fifthGoal.showDetails ? '−' : '+' }}
+                                          </i>
+                                        </div>
+
+                                        <!-- 五级目标日期 -->
+                                        <div class="report-date date-goal">
+                                          <span class="date-day">{{ fifthGoal.formattedDate.day || '∞' }}</span>
+                                          <div class="date-month-year">
+                                            <span>{{ fifthGoal.formattedDate.month || '无截止' }}</span>
+                                            <span>{{ fifthGoal.formattedDate.year || '日期' }}</span>
+                                          </div>
+                                        </div>
+
+                                        <div class="report-divider"></div>
+                                        <div class="task-status" :class="fifthGoal.statusClass">
+                                          {{ fifthGoal.statusText }}
+                                        </div>
+                                      </div>
+
+                                      <!-- 五级目标内容 -->
+                                      <div class="report-content">
+                                        <h3 class="report-summary">{{ fifthGoal.title }}</h3>
+                                        <div class="report-body">
+                                          <p>{{ fifthGoal.content }}</p>
+                                        </div>
+                                      </div>
+
+                                      <!-- 可选：六级目标渲染区域（递归逻辑，结构同上） -->
+                                      <!-- <div v-if="fifthGoal.showDetails && fifthGoal.children && fifthGoal.children.length" class="subgoal-details">
+                                        ... 重复上述结构，变量名改为 sixthGoal，类名改为 sixth-goal-item ...
+                                      </div> -->
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -233,6 +370,7 @@ const formatGoals = (goals: RecGoalVO[]): FormattedGoal[] => {
     if (goal.deadLine) {
       const deadlineDate = new Date(goal.deadLine);
       const currentDate = new Date();
+      currentDate.setHours(0, 0, 0, 0); // 时分秒重置为 0，只保留日期维度
 
       formattedDate = {
         year: deadlineDate.getFullYear().toString(),
@@ -280,24 +418,35 @@ const formatGoals = (goals: RecGoalVO[]): FormattedGoal[] => {
 };
 
 const formatTasks = (tasks: any[]) =>
-  tasks.map((task) => ({
-    ...task,
-    formattedDate: {
-      year: new Date(task.deadLine).getFullYear(),
-      month: `${new Date(task.deadLine).getMonth() + 1}月`,
-      day: new Date(task.deadLine).getDate().toString()
-    },
-    statusText:
-      task.status === 'completed' ? '已完成' : new Date(task.deadLine) < new Date() ? '已逾期' : task.status === 'in-progress' ? '进行中' : '待处理',
-    statusClass:
-      task.status === 'completed'
-        ? 'status-completed'
-        : new Date(task.deadLine) < new Date()
-          ? 'status-overdue'
-          : task.status === 'in-progress'
-            ? 'status-in-progress'
-            : 'status-pending'
-  }));
+  tasks.map((task) => {
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
+
+    return {
+      ...task,
+      formattedDate: {
+        year: new Date(task.deadLine).getFullYear(),
+        month: `${new Date(task.deadLine).getMonth() + 1}月`,
+        day: new Date(task.deadLine).getDate().toString()
+      },
+      statusText:
+        task.status === 'completed'
+          ? '已完成'
+          : new Date(task.deadLine) < currentDate
+            ? '已逾期'
+            : task.status === 'in-progress'
+              ? '进行中'
+              : '待处理',
+      statusClass:
+        task.status === 'completed'
+          ? 'status-completed'
+          : new Date(task.deadLine) < currentDate
+            ? 'status-overdue'
+            : task.status === 'in-progress'
+              ? 'status-in-progress'
+              : 'status-pending'
+    };
+  });
 
 const formatReports = (reports: any[]) =>
   reports.map((report) => ({
@@ -866,5 +1015,32 @@ onUnmounted(() => {
   .report-date {
     gap: 6px; /* 小屏幕缩小间距 */
   }
+}
+
+/* 三级目标容器：缩进 + 浅蓝色边框，与二级目标区分 */
+.third-goal-item {
+  margin-left: 16px; /* 缩进，体现层级 */
+  border-color: #e6f7ff; /* 浅蓝色边框，区别于二级的灰色 */
+}
+
+/* 三级目标的展开控制：缩小尺寸，视觉上更紧凑 */
+.third-goal-item .expand-control {
+  width: 20px;
+  height: 20px;
+}
+.third-goal-item .expand-icon {
+  width: 14px;
+  height: 14px;
+  font-size: 12px;
+}
+
+/* 三级目标的内容区域：左侧边框改为浅蓝色，区分层级 */
+.third-goal-item .report-body {
+  border-left-color: #e6f7ff;
+}
+
+/* 三级目标的详情容器：浅蓝色虚线边框 */
+.subgoal-details .subgoal-details {
+  border-top-color: #e6f7ff;
 }
 </style>
