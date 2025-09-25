@@ -99,9 +99,6 @@
         <el-form-item label="描述" prop="description">
           <el-input v-model="form.description" placeholder="请输入描述" />
         </el-form-item>
-        <!--        <el-form-item label="部门ID" prop="deptId">-->
-        <!--          <el-input v-model="form.deptId" placeholder="请输入部门ID" />-->
-        <!--        </el-form-item>-->
         <el-form-item label="状态" prop="status">
           <el-select v-model="form.status" placeholder="请选择状态" clearable>
             <el-option v-for="dict in ip_white_status" :key="dict.value" :label="dict.label" :value="dict.value" />
@@ -225,6 +222,7 @@ const handleUpdate = async (row?: IpWhiteListVO) => {
   const _id = row?.id || ids.value[0];
   const res = await getIpWhiteList(_id);
   Object.assign(form.value, res.data);
+  form.value.status = form.value.status + '';
   dialog.visible = true;
   dialog.title = '修改IP白名单';
 };

@@ -17,7 +17,7 @@ export interface IpWhiteListVO {
   /**
    * 状态：1-有效，0-无效
    */
-  status: number;
+  status: string | number;
 
   /**
    * 部门ID
@@ -49,7 +49,7 @@ export interface IpWhiteListForm extends BaseEntity {
   /**
    * 状态：1-有效，0-无效
    */
-  status?: number;
+  status?: string | number;
 
   /**
    * 部门ID
@@ -76,7 +76,7 @@ export interface IpWhiteListQuery extends PageQuery {
   /**
    * 状态：1-有效，0-无效
    */
-  status?: number;
+  status?: string | number;
 
   /**
    * 部门ID
