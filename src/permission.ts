@@ -2,13 +2,14 @@ import { to as tos } from 'await-to-js';
 import router from './router';
 import NProgress from 'nprogress';
 import 'nprogress/nprogress.css';
-import { getToken } from '@/utils/auth';
+import { getToken, setToken } from '@/utils/auth';
 import { isHttp, isPathMatch } from '@/utils/validate';
 import { isRelogin } from '@/utils/request';
 import { useUserStore } from '@/store/modules/user';
 import { useSettingsStore } from '@/store/modules/settings';
 import { usePermissionStore } from '@/store/modules/permission';
 import { ElMessage } from 'element-plus/es';
+import { ssoCheck } from '@/api/login';
 
 NProgress.configure({ showSpinner: false });
 const whiteList = ['/login', '/register', '/social-callback', '/register*', '/register/*', '/day-matter'];
@@ -19,6 +20,27 @@ const isWhiteList = (path: string) => {
 
 router.beforeEach(async (to, from, next) => {
   NProgress.start();
+  // SSO 票据换取令牌并清理参数
+  const ssoTicket = (to.query && (to.query as any).sso_ticket) as string | undefined;
+  if (!getToken() && ssoTicket) {
+    try {
+      const res = await ssoCheck(ssoTicket);
+      let token = res.data;
+      if (typeof token === 'string' && token.startsWith('Bearer ')) {
+        token = token.slice(7);
+      }
+      setToken(token);
+      useUserStore().token = token;
+      const { sso_ticket, ...restQuery } = to.query as Record<string, any>;
+      next({ path: '/index', replace: true, query: restQuery });
+      return;
+    } catch (e) {
+      const redirect = encodeURIComponent(to.fullPath || '/');
+      next(`/login?redirect=${redirect}`);
+      NProgress.done();
+      return;
+    }
+  }
   if (getToken()) {
     to.meta.title && useSettingsStore().setTitle(to.meta.title as string);
     /* has token*/

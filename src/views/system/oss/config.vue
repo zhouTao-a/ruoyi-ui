@@ -306,7 +306,7 @@ const submitForm = () => {
 };
 /** 状态修改  */
 const handleStatusChange = async (row: OssConfigVO) => {
-  let text = row.status === '0' ? '启用' : '停用';
+  const text = row.status === '0' ? '启用' : '停用';
   try {
     await proxy?.$modal.confirm('确认要"' + text + '""' + row.configKey + '"配置吗?');
     await changeOssConfigStatus(row.ossConfigId, row.status, row.configKey);

@@ -19,12 +19,14 @@ export const isRelogin = { show: false };
 export const globalHeaders = () => {
   return {
     Authorization: 'Bearer ' + getToken(),
-    clientid: import.meta.env.VITE_APP_CLIENT_ID
+    clientid: import.meta.env.VITE_APP_CLIENT_ID,
+    'Client-Id': import.meta.env.VITE_APP_CLIENT_ID
   };
 };
 
 axios.defaults.headers['Content-Type'] = 'application/json;charset=utf-8';
 axios.defaults.headers['clientid'] = import.meta.env.VITE_APP_CLIENT_ID;
+axios.defaults.headers['Client-Id'] = import.meta.env.VITE_APP_CLIENT_ID;
 // 创建 axios 实例
 const service = axios.create({
   baseURL: import.meta.env.VITE_APP_BASE_API,
@@ -45,6 +47,13 @@ service.interceptors.request.use(
 
     if (getToken() && !isToken) {
       config.headers['Authorization'] = 'Bearer ' + getToken(); // 让每个请求携带自定义token 请根据实际情况自行修改
+    }
+    // 统一携带 Client-Id
+    if (!config.headers['Client-Id']) {
+      config.headers['Client-Id'] = import.meta.env.VITE_APP_CLIENT_ID;
+    }
+    if (!config.headers['clientid']) {
+      config.headers['clientid'] = import.meta.env.VITE_APP_CLIENT_ID;
     }
     // get请求映射params参数
     if (config.method === 'get' && config.params) {
