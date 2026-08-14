@@ -48,11 +48,26 @@
           <div class="batch-control" v-if="formattedGoals.length > 0">
             <button class="batch-btn expand-all" @click="batchToggleAllGoals(true)">全部展开</button>
             <button class="batch-btn collapse-all" @click="batchToggleAllGoals(false)">全部折叠</button>
+            <label class="batch-check">
+              <input type="checkbox" :checked="isAllGoalsSelected" @change="toggleSelectAllGoals" />
+              全选
+            </label>
+            <select v-model="goalBatchStatus" class="batch-select">
+              <option value="">改状态</option>
+              <option v-for="opt in statusOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+            </select>
+            <button class="batch-btn status-apply" @click="applyGoalStatus">修改状态</button>
           </div>
 
           <div v-if="formattedGoals.length > 0" class="reports-list">
             <div v-for="goal in formattedGoals" :key="goal.id" class="report-item">
               <div class="report-header" @click.stop="toggleGoalDetails(goal.id)">
+                <input
+                  type="checkbox"
+                  class="item-check"
+                  :checked="isGoalSelected(goal.id)"
+                  @click.stop="toggleGoalSelect(goal)"
+                />
                 <div v-if="goal.hasChildren" class="expand-control">
                   <i class="expand-icon" :class="{ 'expanded': goal.showDetails }">
                     {{ goal.showDetails ? '-' : '+' }}
@@ -341,9 +356,21 @@
       <!-- 任务标签页（日期区域加专属类：date-task） -->
       <transition name="tab-fade">
         <div v-show="activeTab === 'tasks'" class="tab-pane tasks-tab">
+          <div class="batch-control" v-if="tasks.length > 0">
+            <label class="batch-check">
+              <input type="checkbox" :checked="isAllTasksSelected" @change="toggleSelectAllTasks" />
+              全选
+            </label>
+            <select v-model="taskBatchStatus" class="batch-select">
+              <option value="">改状态</option>
+              <option v-for="opt in statusOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+            </select>
+            <button class="batch-btn status-apply" @click="applyTaskStatus">修改状态</button>
+          </div>
           <div v-if="tasks.length > 0" class="reports-list">
             <div v-for="task in formatTasks(tasks)" :key="task.id" class="report-item">
               <div class="report-header">
+                <input type="checkbox" class="item-check" :checked="isTaskSelected(task.id)" @click.stop="toggleTaskSelect(task.id)" />
                 <!-- 任务日期区域：添加 date-task 类 -->
                 <div class="report-date date-task">
                   <span class="date-day">{{ task.formattedDate.day }}</span>
@@ -404,11 +431,12 @@
 
 <script setup lang="ts">
 // 脚本部分无修改，保持原逻辑
-import { ref, onMounted, watch, onUnmounted } from 'vue';
+import { ref, onMounted, watch, onUnmounted, computed } from 'vue';
+import { ElMessage } from 'element-plus';
 import { listRecReflection } from '@/api/rec/recReflection';
 import { listRecReport } from '@/api/rec/recReport';
-import { listRecGoal } from '@/api/rec/recGoal';
-import { listRecTask } from '@/api/rec/recTask';
+import { listRecGoal, batchUpdateRecGoalStatus } from '@/api/rec/recGoal';
+import { listRecTask, batchUpdateRecTaskStatus } from '@/api/rec/recTask';
 import { RecReportVO } from '@/api/rec/recReport/types';
 import { RecReflectionVO } from '@/api/rec/recReflection/types';
 import { RecGoalVO } from '@/api/rec/recGoal/types';
@@ -449,6 +477,15 @@ const formattedGoals = ref<FormattedGoal[]>([]);
 
 const recRefParams = ref({ pageNum: 1, pageSize: 1, randomFlag: true });
 const pageQueryParams = ref({ pageNum: 1, pageSize: 10 });
+const selectedTaskIds = ref<Array<string | number>>([]);
+const selectedGoalIds = ref<Array<string | number>>([]);
+const taskBatchStatus = ref('');
+const goalBatchStatus = ref('');
+const statusOptions = [
+  { value: 'pending', label: '待处理' },
+  { value: 'in_progress', label: '进行中' },
+  { value: 'completed', label: '已完成' }
+];
 
 const formatGoals = (goals: RecGoalVO[]): FormattedGoal[] => {
   return goals.map((goal) => {
@@ -600,9 +637,11 @@ const getGoalList = async () => {
     const res = await listRecGoal(pageQueryParams.value);
     goals.value = convertToTree(res.rows);
     formattedGoals.value = formatGoals(goals.value.filter((goal) => !goal.parentId || goal.parentId === 0));
+    selectedGoalIds.value = [];
   } catch (e) {
     goals.value = [];
     formattedGoals.value = [];
+    selectedGoalIds.value = [];
   }
 };
 
@@ -639,9 +678,91 @@ const getTaskList = async () => {
   try {
     const res = await listRecTask(pageQueryParams.value);
     tasks.value = res.rows || [];
+    selectedTaskIds.value = [];
   } catch (e) {
     tasks.value = [];
+    selectedTaskIds.value = [];
   }
+};
+
+const collectGoalIds = (items: FormattedGoal[]): Array<string | number> => {
+  const ids: Array<string | number> = [];
+  const walk = (list: FormattedGoal[]) => {
+    list.forEach((item) => {
+      ids.push(item.id);
+      if (item.children?.length) {
+        walk(item.children);
+      }
+    });
+  };
+  walk(items);
+  return ids;
+};
+
+const isTaskSelected = (id: string | number) => selectedTaskIds.value.includes(id);
+const isGoalSelected = (id: string | number) => selectedGoalIds.value.includes(id);
+
+const isAllTasksSelected = computed(() => tasks.value.length > 0 && selectedTaskIds.value.length === tasks.value.length);
+const isAllGoalsSelected = computed(() => {
+  const allIds = collectGoalIds(formattedGoals.value);
+  return allIds.length > 0 && selectedGoalIds.value.length === allIds.length;
+});
+
+const toggleTaskSelect = (id: string | number) => {
+  if (selectedTaskIds.value.includes(id)) {
+    selectedTaskIds.value = selectedTaskIds.value.filter((item) => item !== id);
+  } else {
+    selectedTaskIds.value = [...selectedTaskIds.value, id];
+  }
+};
+
+const toggleSelectAllTasks = () => {
+  selectedTaskIds.value = isAllTasksSelected.value ? [] : tasks.value.map((item) => item.id);
+};
+
+const toggleGoalSelect = (goal: FormattedGoal) => {
+  const ids = collectGoalIds([goal]);
+  const selected = new Set(selectedGoalIds.value);
+  const allChecked = ids.every((id) => selected.has(id));
+  if (allChecked) {
+    ids.forEach((id) => selected.delete(id));
+  } else {
+    ids.forEach((id) => selected.add(id));
+  }
+  selectedGoalIds.value = Array.from(selected);
+};
+
+const toggleSelectAllGoals = () => {
+  selectedGoalIds.value = isAllGoalsSelected.value ? [] : collectGoalIds(formattedGoals.value);
+};
+
+const applyTaskStatus = async () => {
+  if (!selectedTaskIds.value.length) {
+    ElMessage.warning('请先选择任务');
+    return;
+  }
+  if (!taskBatchStatus.value) {
+    ElMessage.warning('请选择状态');
+    return;
+  }
+  await batchUpdateRecTaskStatus(selectedTaskIds.value, taskBatchStatus.value);
+  ElMessage.success('修改成功');
+  await getTaskList();
+};
+
+const applyGoalStatus = async () => {
+  if (!selectedGoalIds.value.length) {
+    ElMessage.warning('请先选择目标');
+    return;
+  }
+  if (!goalBatchStatus.value) {
+    ElMessage.warning('请选择状态');
+    return;
+  }
+  await batchUpdateRecGoalStatus(selectedGoalIds.value, goalBatchStatus.value);
+  ElMessage.success('修改成功');
+  selectedGoalIds.value = [];
+  await getGoalList();
 };
 
 getList();
@@ -1184,8 +1305,35 @@ onUnmounted(() => {
   background-color: #e8f3ff;
   color: #409eff;
 }
-.expand-all:hover {
-  background-color: #d1eaff;
+.batch-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #606266;
+}
+
+.batch-select {
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid #dcdfe6;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.status-apply {
+  background-color: #f0f9eb;
+  color: #67c23a;
+}
+.status-apply:hover {
+  background-color: #e1f3d8;
+}
+
+.item-check {
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  flex-shrink: 0;
 }
 
 /* 全部折叠按钮样式（灰色系，区分展开按钮） */

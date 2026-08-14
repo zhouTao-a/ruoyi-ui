@@ -42,6 +42,11 @@
           <el-col :span="1.5">
             <el-button type="info" plain icon="Sort" @click="handleToggleExpandAll">展开/折叠</el-button>
           </el-col>
+          <el-col :span="1.5">
+            <el-button type="primary" plain icon="Finished" :disabled="multiple" @click="openBatchStatus" v-hasPermi="['rec:recGoal:edit']"
+              >修改状态</el-button
+            >
+          </el-col>
           <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
         </el-row>
       </template>
@@ -52,7 +57,9 @@
         row-key="id"
         :default-expand-all="isExpandAll"
         :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
+        @selection-change="handleSelectionChange"
       >
+        <el-table-column type="selection" width="55" align="center" />
         <el-table-column label="父目标" align="center" prop="parentId" v-if="false" />
         <el-table-column label="层级" align="center" prop="level" v-if="false" />
         <el-table-column label="顶层ID" align="center" prop="topId" v-if="false" />
@@ -159,11 +166,25 @@
         </div>
       </template>
     </el-dialog>
+
+    <el-dialog title="批量修改状态" v-model="batchStatusDialog.visible" width="400px" append-to-body>
+      <el-form label-width="80px">
+        <el-form-item label="状态">
+          <el-select v-model="batchStatusDialog.status" placeholder="请选择状态" style="width: 100%">
+            <el-option v-for="dict in task_status" :key="dict.value" :label="dict.label" :value="dict.value" />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="batchStatusDialog.visible = false">取 消</el-button>
+        <el-button type="primary" :loading="buttonLoading" @click="submitBatchStatus">确 定</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup name="RecGoal" lang="ts">
-import { listRecGoal, getRecGoal, delRecGoal, addRecGoal, updateRecGoal } from '@/api/rec/recGoal';
+import { listRecGoal, getRecGoal, delRecGoal, addRecGoal, updateRecGoal, batchUpdateRecGoalStatus } from '@/api/rec/recGoal';
 import { RecGoalVO, RecGoalQuery, RecGoalForm } from '@/api/rec/recGoal/types';
 import { ref, reactive, toRefs, getCurrentInstance, onMounted, nextTick } from 'vue';
 import { ElInput } from 'element-plus';
@@ -183,6 +204,8 @@ const showSearch = ref(true);
 const isExpandAll = ref(true);
 const loading = ref(false);
 const total = ref(0);
+const ids = ref<Array<string | number>>([]);
+const multiple = ref(true);
 
 const queryFormRef = ref<ElFormInstance>();
 const recGoalFormRef = ref<ElFormInstance>();
@@ -190,6 +213,10 @@ const recGoalTableRef = ref<ElTableInstance>();
 
 const { task_status } = toRefs<any>(proxy?.useDict('task_status'));
 const isDetailView = ref(false); // 是否为详情查看模式
+const batchStatusDialog = reactive({
+  visible: false,
+  status: ''
+});
 const dateRangeDeadLine = ref<[DateModelType, DateModelType]>(['', '']);
 const titleInputRef = ref<InstanceType<typeof ElInput> | null>(null);
 
@@ -291,6 +318,34 @@ const resetQuery = () => {
   dateRangeDeadLine.value = ['', ''];
   queryFormRef.value?.resetFields();
   handleQuery();
+};
+
+/** 多选框选中数据 */
+const handleSelectionChange = (selection: RecGoalVO[]) => {
+  ids.value = selection.map((item) => item.id);
+  multiple.value = !selection.length;
+};
+
+/** 批量修改状态 */
+const openBatchStatus = () => {
+  if (!ids.value.length) {
+    proxy?.$modal.msgWarning('请先选择目标');
+    return;
+  }
+  batchStatusDialog.status = '';
+  batchStatusDialog.visible = true;
+};
+
+const submitBatchStatus = async () => {
+  if (!batchStatusDialog.status) {
+    proxy?.$modal.msgWarning('请选择状态');
+    return;
+  }
+  buttonLoading.value = true;
+  await batchUpdateRecGoalStatus(ids.value, batchStatusDialog.status).finally(() => (buttonLoading.value = false));
+  proxy?.$modal.msgSuccess('修改成功');
+  batchStatusDialog.visible = false;
+  await getList();
 };
 
 /** 新增按钮操作 */

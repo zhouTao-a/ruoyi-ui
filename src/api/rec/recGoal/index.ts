@@ -61,3 +61,14 @@ export const delRecGoal = (id: string | number | Array<string | number>) => {
     method: 'delete'
   });
 };
+
+/**
+ * 批量修改目标状态
+ */
+export const batchUpdateRecGoalStatus = (ids: Array<string | number>, status: string) => {
+  return request({
+    url: '/rec/recGoal/batchStatus',
+    method: 'put',
+    data: { ids, status }
+  });
+};

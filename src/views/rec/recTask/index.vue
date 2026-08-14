@@ -46,6 +46,11 @@
             >
           </el-col>
           <el-col :span="1.5">
+            <el-button type="primary" plain icon="Finished" :disabled="multiple" @click="openBatchStatus" v-hasPermi="['rec:recTask:edit']"
+              >修改状态</el-button
+            >
+          </el-col>
+          <el-col :span="1.5">
             <el-button type="warning" plain icon="Download" @click="handleExport" v-hasPermi="['rec:recTask:export']">导出</el-button>
           </el-col>
           <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
@@ -143,11 +148,25 @@
         </div>
       </template>
     </el-dialog>
+
+    <el-dialog title="批量修改状态" v-model="batchStatusDialog.visible" width="400px" append-to-body>
+      <el-form label-width="80px">
+        <el-form-item label="状态">
+          <el-select v-model="batchStatusDialog.status" placeholder="请选择状态" style="width: 100%">
+            <el-option v-for="dict in task_status" :key="dict.value" :label="dict.label" :value="dict.value" />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="batchStatusDialog.visible = false">取 消</el-button>
+        <el-button type="primary" :loading="buttonLoading" @click="submitBatchStatus">确 定</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup name="RecTask" lang="ts">
-import { listRecTask, getRecTask, delRecTask, addRecTask, updateRecTask } from '@/api/rec/recTask';
+import { listRecTask, getRecTask, delRecTask, addRecTask, updateRecTask, batchUpdateRecTaskStatus } from '@/api/rec/recTask';
 import { RecTaskVO, RecTaskQuery, RecTaskForm } from '@/api/rec/recTask/types';
 import { ref, reactive, toRefs, getCurrentInstance, onMounted, nextTick } from 'vue';
 import { ElInput } from 'element-plus';
@@ -169,6 +188,10 @@ const dateRangeDeadLine = ref<[DateModelType, DateModelType]>(['', '']);
 const queryFormRef = ref<ElFormInstance>();
 const recTaskFormRef = ref<ElFormInstance>();
 const isDetailView = ref(false); // 是否为详情查看模式
+const batchStatusDialog = reactive({
+  visible: false,
+  status: ''
+});
 
 const dialog = reactive<DialogOption>({
   visible: false,
@@ -328,6 +351,28 @@ const handleExport = () => {
     },
     `recTask_${new Date().getTime()}.xlsx`
   );
+};
+
+/** 批量修改状态 */
+const openBatchStatus = () => {
+  if (!ids.value.length) {
+    proxy?.$modal.msgWarning('请先选择任务');
+    return;
+  }
+  batchStatusDialog.status = '';
+  batchStatusDialog.visible = true;
+};
+
+const submitBatchStatus = async () => {
+  if (!batchStatusDialog.status) {
+    proxy?.$modal.msgWarning('请选择状态');
+    return;
+  }
+  buttonLoading.value = true;
+  await batchUpdateRecTaskStatus(ids.value, batchStatusDialog.status).finally(() => (buttonLoading.value = false));
+  proxy?.$modal.msgSuccess('修改成功');
+  batchStatusDialog.visible = false;
+  await getList();
 };
 
 onMounted(() => {

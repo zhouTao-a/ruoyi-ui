@@ -227,14 +227,38 @@ const lunarToSolar = (lunarMonth: number, lunarDay: number, year: number) => {
 };
 
 const fetchReminders = (year: number, month: number) => {
-  return dayMatterList({ year, month, groupId: null })
+  const key = monthKey(year, month);
+  const cached = reminderCache.get(key);
+  if (cached) {
+    return Promise.resolve(cached);
+  }
+  const inflight = reminderInflight.get(key);
+  if (inflight) {
+    return inflight;
+  }
+  const req = dayMatterList({ year, month, groupId: null })
     .then((res) => {
-      return res.data;
+      const data = res.data || [];
+      reminderCache.set(key, data);
+      return data;
     })
-    .catch(() => {
-      return [];
+    .catch(() => [])
+    .finally(() => {
+      reminderInflight.delete(key);
     });
+  reminderInflight.set(key, req);
+  return req;
 };
+
+const monthKey = (year: number, month: number) => `${year}-${month}`;
+
+const shiftMonth = (year: number, month: number, delta: number) => {
+  const date = new Date(year, month - 1 + delta, 1);
+  return { year: date.getFullYear(), month: date.getMonth() + 1 };
+};
+
+const reminderCache = new Map<string, any[]>();
+const reminderInflight = new Map<string, Promise<any[]>>();
 
 watch([currentYear, currentMonth], ([newYear, newMonth], [oldYear, oldMonth]) => {
   // 只有当年月发生变化时才调用
@@ -243,11 +267,28 @@ watch([currentYear, currentMonth], ([newYear, newMonth], [oldYear, oldMonth]) =>
   }
 });
 
+const prefetchNeighbors = (year: number, month: number) => {
+  const prev = shiftMonth(year, month, -1);
+  const next = shiftMonth(year, month, 1);
+  fetchReminders(prev.year, prev.month);
+  fetchReminders(next.year, next.month);
+};
+
 const loadReminders = () => {
   const y = currentYear.value;
   const m = currentMonth.value + 1;
+  const key = monthKey(y, m);
+  const cached = reminderCache.get(key);
+  if (cached) {
+    reminders.value = cached;
+    prefetchNeighbors(y, m);
+    return;
+  }
   fetchReminders(y, m).then((data) => {
-    reminders.value = data;
+    if (currentYear.value === y && currentMonth.value + 1 === m) {
+      reminders.value = data;
+    }
+    prefetchNeighbors(y, m);
   });
 };
 

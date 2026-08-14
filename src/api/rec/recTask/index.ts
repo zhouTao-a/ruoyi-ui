@@ -61,3 +61,14 @@ export const delRecTask = (id: string | number | Array<string | number>) => {
     method: 'delete'
   });
 };
+
+/**
+ * 批量修改任务状态
+ */
+export const batchUpdateRecTaskStatus = (ids: Array<string | number>, status: string) => {
+  return request({
+    url: '/rec/recTask/batchStatus',
+    method: 'put',
+    data: { ids, status }
+  });
+};
