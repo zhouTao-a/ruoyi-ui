@@ -226,7 +226,7 @@ const lunarToSolar = (lunarMonth: number, lunarDay: number, year: number) => {
   }
 };
 
-const monthKey = (year: number, month: number) => `${year}-${month}-1935522589078200322`;
+const monthKey = (year: number, month: number) => `${year}-${month}`;
 
 const shiftMonth = (year: number, month: number, delta: number) => {
   const date = new Date(year, month - 1 + delta, 1);
@@ -246,7 +246,7 @@ const fetchReminders = (year: number, month: number) => {
   if (inflight) {
     return inflight;
   }
-  const req = dayMatterList({ year, month, groupId: '1935522589078200322' })
+  const req = dayMatterList({ year, month, groupId: null })
     .then((res) => {
       const data = res.data || [];
       reminderCache.set(key, data);
