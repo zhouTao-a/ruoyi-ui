@@ -12,7 +12,7 @@ import { ElMessage } from 'element-plus/es';
 import { ssoCheck } from '@/api/login';
 
 NProgress.configure({ showSpinner: false });
-const whiteList = ['/login', '/register', '/social-callback', '/register*', '/register/*', '/day-matter'];
+const whiteList = ['/login', '/social-callback'];
 
 const isWhiteList = (path: string) => {
   return whiteList.some((pattern) => isPathMatch(pattern, path));
@@ -25,8 +25,8 @@ router.beforeEach(async (to, from, next) => {
   if (!getToken() && ssoTicket) {
     try {
       const res = await ssoCheck(ssoTicket);
-      let token = res.data;
-      if (typeof token === 'string' && token.startsWith('Bearer ')) {
+      let token: string = res.data;
+      if (token.startsWith('Bearer ')) {
         token = token.slice(7);
       }
       setToken(token);

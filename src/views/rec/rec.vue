@@ -41,6 +41,25 @@
         </div>
       </transition>
 
+      <!-- 自省标签页 -->
+      <transition name="tab-fade">
+        <div v-show="activeTab === 'introspect'" class="tab-pane">
+          <div class="thought-card" v-if="recIntrospect">
+            <h3 class="thought-title">今日自省：{{ recIntrospect.title }}</h3>
+            <div v-if="recIntrospect.items && recIntrospect.items.length" class="thought-content">
+              <p>
+                <strong>今日记录 {{ recIntrospect.items.length }} 次：</strong>
+              </p>
+              <p v-for="(item, index) in recIntrospect.items" :key="item.id">{{ index + 1 }}. {{ item.content }}</p>
+            </div>
+            <p v-else class="thought-content">今日暂无记录</p>
+          </div>
+          <div v-else class="empty-state">
+            <p>暂无生效的自省主题</p>
+          </div>
+        </div>
+      </transition>
+
       <!-- 目标标签页（日期区域加专属类：date-goal） -->
       <transition name="tab-fade">
         <div v-show="activeTab === 'goals'" class="tab-pane goals-tab">
@@ -62,12 +81,7 @@
           <div v-if="formattedGoals.length > 0" class="reports-list">
             <div v-for="goal in formattedGoals" :key="goal.id" class="report-item">
               <div class="report-header" @click.stop="toggleGoalDetails(goal.id)">
-                <input
-                  type="checkbox"
-                  class="item-check"
-                  :checked="isGoalSelected(goal.id)"
-                  @click.stop="toggleGoalSelect(goal)"
-                />
+                <input type="checkbox" class="item-check" :checked="isGoalSelected(goal.id)" @click.stop="toggleGoalSelect(goal)" />
                 <div v-if="goal.hasChildren" class="expand-control">
                   <i class="expand-icon" :class="{ 'expanded': goal.showDetails }">
                     {{ goal.showDetails ? '-' : '+' }}
@@ -437,10 +451,12 @@ import { listRecReflection } from '@/api/rec/recReflection';
 import { listRecReport } from '@/api/rec/recReport';
 import { listRecGoal, batchUpdateRecGoalStatus } from '@/api/rec/recGoal';
 import { listRecTask, batchUpdateRecTaskStatus } from '@/api/rec/recTask';
+import { getCurrentRecIntrospect } from '@/api/rec/recIntrospect';
 import { RecReportVO } from '@/api/rec/recReport/types';
 import { RecReflectionVO } from '@/api/rec/recReflection/types';
 import { RecGoalVO } from '@/api/rec/recGoal/types';
 import { RecTaskVO } from '@/api/rec/recTask/types';
+import { RecIntrospectVO } from '@/api/rec/recIntrospect/types';
 
 interface FormattedGoal {
   id: string | number;
@@ -463,6 +479,7 @@ interface FormattedGoal {
 
 const tabs = [
   { name: 'thoughts', label: '感想' },
+  { name: 'introspect', label: '自省' },
   { name: 'goals', label: '目标' },
   { name: 'tasks', label: '任务' },
   { name: 'reports', label: '报告' }
@@ -470,6 +487,7 @@ const tabs = [
 
 const activeTab = ref('thoughts');
 const recReflection = ref<RecReflectionVO | null>(null);
+const recIntrospect = ref<RecIntrospectVO | null>(null);
 const reports = ref<RecReportVO[]>([]);
 const tasks = ref<RecTaskVO[]>([]);
 const goals = ref<RecGoalVO[]>([]);
@@ -632,6 +650,15 @@ const getList = async () => {
   }
 };
 
+const getIntrospect = async () => {
+  try {
+    const res = await getCurrentRecIntrospect();
+    recIntrospect.value = res.data || null;
+  } catch (e) {
+    recIntrospect.value = null;
+  }
+};
+
 const getGoalList = async () => {
   try {
     const res = await listRecGoal(pageQueryParams.value);
@@ -766,6 +793,7 @@ const applyGoalStatus = async () => {
 };
 
 getList();
+getIntrospect();
 getReportList();
 getGoalList();
 getTaskList();

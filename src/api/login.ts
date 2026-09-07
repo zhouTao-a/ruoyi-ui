@@ -9,7 +9,7 @@ const clientId = import.meta.env.VITE_APP_CLIENT_ID;
 /**
  * SSO票据校验，换取令牌
  */
-export function ssoCheck(ticket: string): AxiosPromise<{ data: string }> {
+export function ssoCheck(ticket: string): AxiosPromise<string> {
   return request({
     url: '/sso/check',
     headers: {
